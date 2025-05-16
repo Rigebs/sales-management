@@ -9,7 +9,7 @@ if (localPropertiesFile.exists()) {
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
+    kotlin("kapt")
     kotlin("plugin.serialization") version "2.0.21"
 }
 
@@ -71,4 +71,7 @@ dependencies {
     implementation(libs.ktor.client.android)
 
     implementation (libs.jakewharton.threetenabp)
+
+    implementation (libs.glide)
+    kapt (libs.compiler)
 }

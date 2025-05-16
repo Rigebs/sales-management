@@ -9,7 +9,7 @@ import java.math.BigDecimal
 data class Product(
     val id: String,
     val name: String,
-    val barCode: String,
+    @SerialName("bar_code") val barCode: String,
 
     @SerialName("selling_price")
     @Serializable(with = BigDecimalSerializer::class)
