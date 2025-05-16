@@ -1,0 +1,36 @@
+package com.rige.viewmodels
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.rige.models.Sale
+import com.rige.repositories.SaleRepository
+import kotlinx.coroutines.launch
+
+class SaleViewModel(private val repository: SaleRepository) : ViewModel() {
+
+    private val _sales = MutableLiveData<List<Sale>>()
+    val sales: LiveData<List<Sale>> get() = _sales
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
+
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> get() = _error
+
+    fun loadSales() {
+        _isLoading.value = true
+        _error.value = null
+
+        viewModelScope.launch {
+            try {
+                _sales.value = repository.findAll()
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+}
