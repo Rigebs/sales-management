@@ -6,9 +6,42 @@ import io.github.jan.supabase.postgrest.postgrest
 
 class PaymentRepository(private val client: SupabaseClient) {
 
-    suspend fun getPayments(): List<Payment> {
-        return client.postgrest["payments"]
+    suspend fun findAll(): List<Payment> {
+        return client.postgrest.from("payments")
             .select()
-            .decodeList<Payment>()
+            .decodeList()
+    }
+
+    suspend fun findById(id: String): Payment? {
+        return client.postgrest.from("payments")
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull()
+    }
+
+    suspend fun save(payment: Payment) {
+        client.postgrest.from("payments")
+            .insert(payment)
+    }
+
+    suspend fun update(payment: Payment) {
+        client.postgrest.from("payments")
+            .update(payment) {
+                filter {
+                    eq("id", payment.id)
+                }
+            }
+    }
+
+    suspend fun deleteById(id: String) {
+        client.postgrest.from("payments")
+            .delete {
+                filter {
+                    eq("id", id)
+                }
+            }
     }
 }

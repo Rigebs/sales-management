@@ -6,9 +6,42 @@ import io.github.jan.supabase.postgrest.postgrest
 
 class CategoryRepository(private val client: SupabaseClient) {
 
-    suspend fun getCategories(): List<Category> {
-        return client.postgrest["categories"]
+    suspend fun findAll(): List<Category> {
+        return client.postgrest.from("categories")
             .select()
-            .decodeList<Category>()
+            .decodeList()
+    }
+
+    suspend fun findById(id: String): Category? {
+        return client.postgrest.from("categories")
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull()
+    }
+
+    suspend fun save(category: Category) {
+        client.postgrest.from("categories")
+            .insert(category)
+    }
+
+    suspend fun update(category: Category) {
+        client.postgrest.from("categories")
+            .update(category) {
+                filter {
+                    eq("id", category.id)
+                }
+            }
+    }
+
+    suspend fun deleteById(id: String) {
+        client.postgrest.from("categories")
+            .delete {
+                filter {
+                    eq("id", id)
+                }
+            }
     }
 }

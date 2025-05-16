@@ -6,9 +6,42 @@ import io.github.jan.supabase.postgrest.postgrest
 
 class SaleDetailRepository(private val client: SupabaseClient) {
 
-    suspend fun getSaleDetails(): List<SaleDetail> {
-        return client.postgrest["sale-details"]
+    suspend fun findAll(): List<SaleDetail> {
+        return client.postgrest.from("sale_details")
             .select()
-            .decodeList<SaleDetail>()
+            .decodeList()
+    }
+
+    suspend fun findById(id: String): SaleDetail? {
+        return client.postgrest.from("sale_details")
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull()
+    }
+
+    suspend fun save(saleDetail: SaleDetail) {
+        client.postgrest.from("sale_details")
+            .insert(saleDetail)
+    }
+
+    suspend fun update(saleDetail: SaleDetail) {
+        client.postgrest.from("sale_details")
+            .update(saleDetail) {
+                filter {
+                    eq("id", saleDetail.id)
+                }
+            }
+    }
+
+    suspend fun deleteById(id: String) {
+        client.postgrest.from("sale_details")
+            .delete {
+                filter {
+                    eq("id", id)
+                }
+            }
     }
 }
