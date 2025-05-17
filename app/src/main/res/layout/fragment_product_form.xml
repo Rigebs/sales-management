@@ -35,7 +35,8 @@
             android:layout_height="wrap_content"
             android:hint="Código de barras"
             app:endIconMode="custom"
-            app:endIconDrawable="@android:drawable/ic_menu_camera"
+            android:layout_marginVertical="8dp"
+            app:endIconDrawable="@drawable/ic_camera"
             app:endIconContentDescription="Escanear código de barras" >
 
             <com.google.android.material.textfield.TextInputEditText
@@ -51,7 +52,8 @@
             android:layout_height="wrap_content"
             android:hint="Precio de venta"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_marginVertical="8dp">
+            android:layout_marginVertical="8dp"
+            app:prefixText="S/." >
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSellingPrice"
@@ -66,7 +68,8 @@
             android:layout_height="wrap_content"
             android:hint="Precio de costo"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_marginVertical="8dp">
+            android:layout_marginVertical="8dp"
+            app:prefixText="S/.">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etCostPrice"
@@ -126,14 +129,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Activo"
-            android:layout_marginVertical="12dp" />
+            android:layout_marginVertical="8dp" />
 
         <!-- Botón guardar -->
         <Button
             android:id="@+id/btnSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar producto"
-            android:layout_marginTop="16dp" />
+            android:text="Guardar producto"/>
     </LinearLayout>
 </ScrollView>

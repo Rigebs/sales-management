@@ -10,12 +10,14 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.rige.databinding.FragmentProductFormBinding
 import com.rige.models.Product
 import com.rige.viewmodels.ProductViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import java.util.UUID
+import com.rige.R
 
 @AndroidEntryPoint
 class ProductFormFragment : Fragment() {
@@ -91,6 +93,17 @@ class ProductFormFragment : Fragment() {
                 viewModel.saveProduct(product)
             } else {
                 viewModel.updateProduct(product)
+            }
+        }
+
+        binding.barcodeLayout.setEndIconOnClickListener {
+            findNavController().navigate(R.id.action_productFormFragment_to_barcodeScannerFragment)
+        }
+
+        parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
+            val scannedBarcode = bundle.getString("barcode")
+            scannedBarcode?.let {
+                binding.etBarCode.setText(it)
             }
         }
     }

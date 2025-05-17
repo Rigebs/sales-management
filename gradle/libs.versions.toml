@@ -1,6 +1,8 @@
 [versions]
 agp = "8.9.1"
+barcodeScanning = "17.3.0"
 bom = "3.1.4"
+cameraCore = "1.4.2"
 glide = "4.15.1"
 hiltAndroidGradlePlugin = "2.56.2"
 kotlin = "2.0.21"
@@ -18,9 +20,14 @@ navigationUiKtx = "2.9.0"
 threetenabpVersion = "1.4.4"
 
 [libraries]
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCore" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUiKtx" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "bom" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }

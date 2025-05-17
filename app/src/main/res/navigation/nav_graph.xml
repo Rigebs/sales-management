@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_graph">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/productFormFragment">
 
+    <fragment
+        android:id="@+id/productFormFragment"
+        android:name="com.rige.ui.ProductFormFragment"
+        android:label="Formulario de Producto">
+        <action
+            android:id="@+id/action_productFormFragment_to_barcodeScannerFragment"
+            app:destination="@id/barcodeScannerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/barcodeScannerFragment"
+        android:name="com.rige.ui.BarcodeScannerFragment"
+        android:label="Escanear Código de Barras" />
 </navigation>
