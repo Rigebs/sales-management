@@ -1,0 +1,33 @@
+package com.rige.di
+
+import com.rige.BuildConfig
+import com.rige.repositories.ProductRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideSupabaseClient(): io.github.jan.supabase.SupabaseClient {
+        return createSupabaseClient(
+            supabaseUrl = BuildConfig.SUPABASE_URL,
+            supabaseKey = BuildConfig.SUPABASE_KEY
+        ) {
+            install(Postgrest)
+        }
+    }
+
+    @Provides
+    @Singleton
+    fun provideProductRepository(client: io.github.jan.supabase.SupabaseClient): ProductRepository {
+        return ProductRepository(client)
+    }
+}

@@ -1,14 +1,20 @@
 package com.rige.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rige.models.Product
 import com.rige.repositories.ProductRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
+@HiltViewModel
+class ProductViewModel @Inject constructor(
+    private val repository: ProductRepository
+) : ViewModel() {
 
     private val _products = MutableLiveData<List<Product>>()
     val products: LiveData<List<Product>> get() = _products
@@ -31,6 +37,37 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    fun getProductById(id: String): LiveData<Product?> {
+        val result = MutableLiveData<Product?>()
+        viewModelScope.launch {
+            try {
+                result.value = repository.findById(id)
+            } catch (e: Exception) {
+                result.value = null
+                _error.value = e.message
+            }
+        }
+        return result
+    }
+
+    fun saveProduct(product: Product) = viewModelScope.launch {
+        try {
+            repository.save(product)
+            loadProducts()
+        } catch (e: Exception) {
+            Log.e("ProductVM", "Error guardando producto", e)
+        }
+    }
+
+    fun updateProduct(product: Product) = viewModelScope.launch {
+        try {
+            repository.update(product)
+            loadProducts()
+        } catch (e: Exception) {
+            Log.e("ProductVM", "Error actualizando producto", e)
         }
     }
 }

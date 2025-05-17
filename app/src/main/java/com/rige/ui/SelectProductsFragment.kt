@@ -29,7 +29,7 @@ class SelectProductsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val repo = ProductRepository(SupabaseClient.client)
+        val repo = ProductRepository(SupabaseClient.supabase)
         viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 @Suppress("UNCHECKED_CAST")

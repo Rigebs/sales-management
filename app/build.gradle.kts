@@ -11,14 +11,16 @@ plugins {
     alias(libs.plugins.kotlin.android)
     kotlin("kapt")
     kotlin("plugin.serialization") version "2.0.21"
+
+    id ("kotlin-kapt")
+    id ("dagger.hilt.android.plugin")
 }
-
-
 
 android {
 
     buildFeatures {
         buildConfig = true
+        viewBinding = true
     }
 
     namespace = "com.rige"
@@ -74,4 +76,14 @@ dependencies {
 
     implementation (libs.glide)
     kapt (libs.compiler)
+
+    implementation (libs.androidx.navigation.fragment.ktx)
+    implementation (libs.androidx.navigation.ui.ktx)
+
+    implementation (libs.hilt.android)
+    kapt (libs.hilt.compiler)
+}
+
+kapt {
+    correctErrorTypes = true
 }

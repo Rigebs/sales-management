@@ -17,12 +17,10 @@ data class Product(
 
     @SerialName("cost_price")
     @Serializable(with = BigDecimalSerializer::class)
-    val costPrice: BigDecimal,
+    val costPrice: BigDecimal?,
 
     val quantity: Int,
     @SerialName("image_url") val imageUrl: String,
-
     val status: Boolean,
-
-    @SerialName("category_id") val categoryId: String
+    @SerialName("category_id") val categoryId: String?
 )
