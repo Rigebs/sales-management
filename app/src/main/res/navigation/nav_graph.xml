@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/productFormFragment">
+    app:startDestination="@id/productListFragment">
 
     <fragment
         android:id="@+id/productFormFragment"
@@ -18,4 +18,23 @@
         android:id="@+id/barcodeScannerFragment"
         android:name="com.rige.ui.BarcodeScannerFragment"
         android:label="Escanear Código de Barras" />
+
+    <fragment
+        android:id="@+id/productListFragment"
+        android:name="com.rige.ui.ProductListFragment"
+        android:label="Lista de productos">
+
+        <action
+            android:id="@+id/actionToEditProduct"
+            app:destination="@id/productFormFragment">
+            <argument
+                android:name="productId"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/selectProductsFragment"
+        android:name="com.rige.ui.SelectProductsFragment"
+        android:label="Seleccionar productos" />
 </navigation>

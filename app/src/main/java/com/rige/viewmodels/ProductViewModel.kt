@@ -32,6 +32,7 @@ class ProductViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _products.value = repository.findAll()
+                println("PRODUCTOS: ${_products.value}")
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {

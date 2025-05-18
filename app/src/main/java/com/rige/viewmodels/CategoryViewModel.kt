@@ -6,9 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rige.models.Category
 import com.rige.repositories.CategoryRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
+@HiltViewModel
+class CategoryViewModel @Inject constructor(
+    private val repository: CategoryRepository
+): ViewModel() {
 
     private val _categories = MutableLiveData<List<Category>>()
     val categories: LiveData<List<Category>> get() = _categories

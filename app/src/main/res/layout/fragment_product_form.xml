@@ -99,7 +99,8 @@
             android:layout_height="wrap_content"
             android:hint="URL de imagen"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_marginVertical="8dp">
+            android:layout_marginVertical="8dp"
+            android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etImageUrl"
@@ -108,19 +109,57 @@
                 android:inputType="textUri" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Vista previa de la imagen -->
+        <ImageView
+            android:id="@+id/ivPreview"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginVertical="8dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"/>
+
+        <!-- Botones aceptar/cancelar imagen (inicialmente GONE) -->
+        <LinearLayout
+            android:id="@+id/imageActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancelar"
+                android:layout_marginEnd="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnConfirmImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aceptar" />
+        </LinearLayout>
+
+        <!-- Botón para seleccionar imagen (VISIBLE por defecto) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seleccionar imagen"/>
+
         <!-- ID de categoría -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="ID de categoría"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:hint="Categoría"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_marginVertical="8dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCategoryId"
+            <AutoCompleteTextView
+                android:id="@+id/spinnerCategory"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Estado activo -->
@@ -132,10 +171,12 @@
             android:layout_marginVertical="8dp" />
 
         <!-- Botón guardar -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.Button"
+            app:icon="@drawable/ic_camera"
             android:text="Guardar producto"/>
     </LinearLayout>
 </ScrollView>

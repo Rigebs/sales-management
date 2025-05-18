@@ -11,10 +11,10 @@ import com.bumptech.glide.Glide
 import com.rige.models.Product
 import com.rige.R
 
-class ProductAdapter(
+class ProductCardAdapter(
     private val products: List<Product>,
     private val onAddClicked: (Product) -> Unit
-) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+) : RecyclerView.Adapter<ProductCardAdapter.ProductViewHolder>() {
 
     inner class ProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imgProduct: ImageView = view.findViewById(R.id.imgProduct)

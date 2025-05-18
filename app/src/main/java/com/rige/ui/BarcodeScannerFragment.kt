@@ -24,7 +24,9 @@ import androidx.navigation.fragment.findNavController
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.rige.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class BarcodeScannerFragment : Fragment() {
 
     private lateinit var previewView: PreviewView

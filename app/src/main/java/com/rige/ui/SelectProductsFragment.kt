@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rige.R
-import com.rige.adapters.ProductAdapter
+import com.rige.adapters.ProductCardAdapter
 import com.rige.clients.SupabaseClient
 import com.rige.repositories.ProductRepository
 import com.rige.viewmodels.ProductViewModel
@@ -19,7 +19,7 @@ import com.rige.viewmodels.ProductViewModel
 class SelectProductsFragment : Fragment() {
 
     private lateinit var viewModel: ProductViewModel
-    private lateinit var adapter: ProductAdapter
+    private lateinit var adapter: ProductCardAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,7 +41,7 @@ class SelectProductsFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         viewModel.products.observe(viewLifecycleOwner) { products ->
-            adapter = ProductAdapter(products) { product ->
+            adapter = ProductCardAdapter(products) { product ->
                 Toast.makeText(requireContext(), "Agregaste: ${product.name}", Toast.LENGTH_SHORT).show()
                 // Aquí podrías añadir a un carrito en tu ViewModel o pasar a siguiente pantalla
             }
