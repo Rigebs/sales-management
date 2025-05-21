@@ -5,12 +5,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.rige.R
 import com.rige.databinding.ItemListProductBinding
-import com.rige.databinding.ItemProductBinding
 import com.rige.models.Product
 
 class ProductListAdapter(
-    val onEdit: (Product) -> Unit
+    val onEdit: (Product) -> Unit,
+    val onStatusClick: (Product) -> Unit
 ) : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(DiffCallback()) {
 
     inner class ProductViewHolder(val binding: ItemListProductBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -18,6 +20,21 @@ class ProductListAdapter(
             binding.tvName.text = product.name
             binding.tvPrice.text = "S/. ${product.sellingPrice}"
             binding.tvStock.text = "Stock: ${product.quantity}"
+
+            val statusIconRes = if (product.status) {
+                R.drawable.ic_green_circle
+            } else {
+                R.drawable.ic_red_circle
+            }
+            binding.centerIcon.setImageResource(statusIconRes)
+
+            Glide.with(binding.productImage.context)
+                .load(product.imageUrl)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .error(R.drawable.ic_broken_image)
+                .into(binding.productImage)
+
+            binding.centerIcon.setOnClickListener { onStatusClick(product) }
 
             binding.root.setOnClickListener { onEdit(product) }
         }

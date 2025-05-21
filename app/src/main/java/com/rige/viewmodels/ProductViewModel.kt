@@ -71,4 +71,15 @@ class ProductViewModel @Inject constructor(
             Log.e("ProductVM", "Error actualizando producto", e)
         }
     }
+
+    fun toggleStatus(product: Product) = viewModelScope.launch {
+        try {
+            val updatedProduct = product.copy(status = !product.status)
+            repository.update(updatedProduct)
+            loadProducts()
+        } catch (e: Exception) {
+            Log.e("ProductVM", "Error cambiando estado del producto", e)
+            _error.value = "No se pudo cambiar el estado del producto"
+        }
+    }
 }

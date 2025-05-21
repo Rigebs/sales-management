@@ -26,7 +26,7 @@ class ProductCardAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_product, parent, false)
+            .inflate(R.layout.item_select_product, parent, false)
         return ProductViewHolder(view)
     }
 

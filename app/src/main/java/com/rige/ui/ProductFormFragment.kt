@@ -124,7 +124,6 @@ class ProductFormFragment : Fragment() {
             } else {
                 viewModel.updateProduct(product)
             }
-
             findNavController().popBackStack()
         }
 
@@ -148,7 +147,6 @@ class ProductFormFragment : Fragment() {
         binding.btnSelectImage.setOnClickListener {
             val context = requireContext()
 
-            // Intent para galería
             val galleryIntent = Intent(Intent.ACTION_PICK).apply {
                 type = "image/*"
             }
@@ -185,10 +183,8 @@ class ProductFormFragment : Fragment() {
                             Toast.makeText(requireContext(), "Imagen subida", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(requireContext(), "Error al subir imagen", Toast.LENGTH_LONG).show()
-                            // Opción: resetear UI a estado inicial
                         }
 
-                        // Permitir cambiar imagen
                         binding.imageActionButtons.visibility = View.GONE
                         binding.btnSelectImage.visibility = View.VISIBLE
                     }
@@ -231,10 +227,15 @@ class ProductFormFragment : Fragment() {
                 .load(product.imageUrl)
                 .into(binding.ivPreview)
 
-            // Mostrar botón para cambiar imagen
             binding.btnSelectImage.visibility = View.VISIBLE
         }
         binding.cbStatus.isChecked = product.status
+        val categories = categoryViewModel.categories.value
+        categories?.let {
+            val categoriesWithNone = listOf(Category(id = "", name = "Sin categoría")) + it
+            val selectedCategory = categoriesWithNone.find { c -> c.id == product.categoryId } ?: categoriesWithNone[0]
+            binding.spinnerCategory.setText(selectedCategory.name, false)
+        }
     }
 
     private fun setupCategorySpinner(categories: List<Category>) {
