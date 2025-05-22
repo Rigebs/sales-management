@@ -42,9 +42,7 @@ class SelectProductsFragment : Fragment() {
 
         viewModel.products.observe(viewLifecycleOwner) { products ->
             adapter = ProductCardAdapter(products) { product ->
-                Toast.makeText(requireContext(), "Agregaste: ${product.name}", Toast.LENGTH_SHORT).show()
-                // Aquí podrías añadir a un carrito en tu ViewModel o pasar a siguiente pantalla
-            }
+                (activity as? MakeSaleActivity)?.increaseCartCount()            }
             recyclerView.adapter = adapter
         }
 
