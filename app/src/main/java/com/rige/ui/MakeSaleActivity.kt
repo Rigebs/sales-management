@@ -9,7 +9,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.rige.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MakeSaleActivity : AppCompatActivity() {
 
     private var cartItemCount = 0

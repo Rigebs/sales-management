@@ -22,6 +22,16 @@ class ProductRepository(private val client: SupabaseClient) {
             .decodeSingleOrNull()
     }
 
+    suspend fun findByBarcode(barcode: String): Product? {
+        return client.postgrest.from("products")
+            .select {
+                filter {
+                    eq("bar_code", barcode)
+                }
+            }
+            .decodeSingleOrNull()
+    }
+
     suspend fun save(product: Product) {
         client.postgrest.from("products")
             .insert(product)

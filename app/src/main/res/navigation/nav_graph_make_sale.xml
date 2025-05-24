@@ -2,10 +2,24 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph_sales"
-    app:startDestination="@id/selectProductsFragment">
+    app:startDestination="@id/generateSaleFragment">
 
     <fragment
         android:id="@+id/selectProductsFragment"
         android:name="com.rige.ui.SelectProductsFragment"
         android:label="Seleccionar productos" />
+
+    <fragment
+        android:id="@+id/generateSaleFragment"
+        android:name="com.rige.ui.GenerateSaleFragment"
+        android:label="Generar venta">
+        <action
+            android:id="@+id/action_generateSaleFragment_to_barcodeScannerFragment"
+            app:destination="@id/barcodeScannerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/barcodeScannerFragment"
+        android:name="com.rige.ui.BarcodeScannerFragment"
+        android:label="Scanner de productos" />
 </navigation>

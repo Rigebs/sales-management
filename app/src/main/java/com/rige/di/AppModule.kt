@@ -3,6 +3,7 @@ package com.rige.di
 import com.rige.BuildConfig
 import com.rige.repositories.CategoryRepository
 import com.rige.repositories.ProductRepository
+import com.rige.repositories.SaleRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,5 +37,11 @@ object AppModule {
     @Singleton
     fun provideCategoryRepository(client: io.github.jan.supabase.SupabaseClient): CategoryRepository {
         return CategoryRepository(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSaleRepository(client: io.github.jan.supabase.SupabaseClient): SaleRepository {
+        return SaleRepository(client)
     }
 }
