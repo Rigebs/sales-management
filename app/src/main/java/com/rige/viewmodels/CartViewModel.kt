@@ -1,5 +1,7 @@
 package com.rige.viewmodels
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -49,11 +51,13 @@ class CartViewModel @Inject constructor(
         _cart.value = emptyList()
     }
 
-    fun addProductByBarcode(barcode: String) {
+    fun addProductByBarcode(context: Context, barcode: String) {
         viewModelScope.launch {
             val product = productRepository.findByBarcode(barcode)
-            product?.let {
-                addItemToCart(it.id, it.name, it.imageUrl.toString(), it.sellingPrice)
+            if (product != null) {
+                addItemToCart(product.id, product.name, product.imageUrl.toString(), product.sellingPrice)
+            } else {
+                Toast.makeText(context, "Producto no encontrado con ese código", Toast.LENGTH_SHORT).show()
             }
         }
     }

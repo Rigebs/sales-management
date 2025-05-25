@@ -10,9 +10,4 @@
     <style name="Base" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- otros atributos -->
     </style>
-
-    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Tus overrides, si los hay -->
-    </style>
-
 </resources>

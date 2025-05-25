@@ -7,15 +7,16 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rige.models.Product
 import com.rige.R
 
 class ProductCardAdapter(
-    private val products: List<Product>,
     private val onAddClicked: (Product) -> Unit
-) : RecyclerView.Adapter<ProductCardAdapter.ProductViewHolder>() {
+) : ListAdapter<Product, ProductCardAdapter.ProductViewHolder>(ProductDiffCallback()) {
 
     inner class ProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imgProduct: ImageView = view.findViewById(R.id.imgProduct)
@@ -31,10 +32,9 @@ class ProductCardAdapter(
         return ProductViewHolder(view)
     }
 
-    override fun getItemCount() = products.size
-
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        val product = products[position]
+        val product = getItem(position)
+
         holder.tvProductName.text = product.name
         holder.tvBarCode.text = "Código: ${product.barCode}"
         holder.tvPrice.text = "s/. ${product.sellingPrice}"
@@ -48,5 +48,13 @@ class ProductCardAdapter(
             onAddClicked(product)
             Toast.makeText(holder.itemView.context, "${product.name} agregado al carrito", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    class ProductDiffCallback : DiffUtil.ItemCallback<Product>() {
+        override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean =
+            oldItem.id == newItem.id
+
+        override fun areContentsTheSame(oldItem: Product, newItem: Product): Boolean =
+            oldItem == newItem
     }
 }

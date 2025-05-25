@@ -50,10 +50,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/emptyView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/btnScan"
+        app:layout_constraintBottom_toTopOf="@id/cartSummary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_cart_empty"
+            app:tint="@color/darker_gray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aún no hay productos"
+            android:textSize="16sp"
+            android:textColor="@color/darker_gray"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+
     <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/recyclerCart"/>
+        app:layout_constraintBottom_toTopOf="@+id/cartSummary"/>
 
     <!-- Resumen carrito -->
     <LinearLayout
@@ -75,10 +103,10 @@
             android:textSize="18sp" />
 
         <Button
-            android:id="@+id/btnPay"
+            android:id="@+id/btnSell"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PAGAR"
+            android:text="VENDER"
             android:layout_marginTop="8dp"
             android:backgroundTint="#009688"/>
     </LinearLayout>

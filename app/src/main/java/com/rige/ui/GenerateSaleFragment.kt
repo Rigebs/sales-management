@@ -23,6 +23,7 @@ class GenerateSaleFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: CartAdapter
     private lateinit var txtTotal: TextView
+    private lateinit var emptyView: View
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,6 +39,7 @@ class GenerateSaleFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         txtTotal = view.findViewById(R.id.txtTotal)
+        emptyView = view.findViewById(R.id.emptyView)
 
         adapter = CartAdapter(
             onQuantityChange = { item, newCount ->
@@ -52,14 +54,23 @@ class GenerateSaleFragment : Fragment() {
 
         cartViewModel.cart.observe(viewLifecycleOwner) { products ->
             adapter.submitList(products.toList())
+
             val total = products.sumOf { it.price.multiply(BigDecimal(it.count)) }
-            txtTotal.text = "Total: s/. ${total}"
+            txtTotal.text = "Total: s/. $total"
+
+            if (products.isEmpty()) {
+                recyclerView.visibility = View.GONE
+                emptyView.visibility = View.VISIBLE
+            } else {
+                recyclerView.visibility = View.VISIBLE
+                emptyView.visibility = View.GONE
+            }
         }
 
         parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
             val barcode = bundle.getString("barcode") ?: return@setFragmentResultListener
             println("BARCODE: $barcode")
-            cartViewModel.addProductByBarcode(barcode)
+            cartViewModel.addProductByBarcode(requireContext(), barcode)
         }
 
         view.findViewById<Button>(R.id.btnScan).setOnClickListener {

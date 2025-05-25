@@ -1,18 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/mainConstraint"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:padding="16dp">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/nav_host_fragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:navGraph="@navigation/nav_graph"
-        app:defaultNavHost="true" />
+    <!-- Card 1: Ventas -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSales"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintWidth_percent="0.48"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_sales"
+                android:contentDescription="Ventas"
+                app:tint="?attr/colorOnSurface"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ventas"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Card 2: Productos -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardProducts"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintWidth_percent="0.48"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cardSales"
+        android:layout_marginStart="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_products"
+                android:contentDescription="Productos"
+                app:tint="?attr/colorOnSurface"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Productos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Card 3: Clientes -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardCustomers"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintWidth_percent="0.48"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toBottomOf="@id/cardSales"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_customers"
+                android:contentDescription="Clientes"
+                app:tint="?attr/colorOnSurface"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clientes"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Card 4: Pedidos -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardOrders"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintWidth_percent="0.48"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toBottomOf="@id/cardProducts"
+        app:layout_constraintStart_toEndOf="@id/cardCustomers"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_orders"
+                android:contentDescription="Pedidos"
+                app:tint="?attr/colorOnSurface"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pedidos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
