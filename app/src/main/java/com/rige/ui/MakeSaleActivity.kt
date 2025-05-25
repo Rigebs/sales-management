@@ -8,19 +8,40 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.activity.viewModels
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.rige.R
+import com.rige.viewmodels.CartViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MakeSaleActivity : AppCompatActivity() {
 
+    private lateinit var navController: NavController
     private var cartItemCount = 0
     private var cartBadgeTextView: TextView? = null
-
+    private val cartViewModel: CartViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_make_sale)
+
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_make_sale) as NavHostFragment
+        navController = navHostFragment.navController
+
+        setupActionBarWithNavController(navController)
+
+        cartViewModel.cart.observe(this) { items ->
+            cartItemCount = items.size
+            updateCartBadge()
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -62,11 +83,5 @@ class MakeSaleActivity : AppCompatActivity() {
         } else {
             cartBadgeTextView?.visibility = View.GONE
         }
-    }
-
-    fun increaseCartCount() {
-        cartItemCount++
-        updateCartBadge()
-        println("SE SUNMAA $cartItemCount")
     }
 }

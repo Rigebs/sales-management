@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,11 +14,14 @@ import com.rige.R
 import com.rige.adapters.ProductCardAdapter
 import com.rige.clients.SupabaseClient
 import com.rige.repositories.ProductRepository
+import com.rige.viewmodels.CartViewModel
 import com.rige.viewmodels.ProductViewModel
 
 class SelectProductsFragment : Fragment() {
 
-    private lateinit var viewModel: ProductViewModel
+    private lateinit var productViewModel: ProductViewModel
+    private val cartViewModel: CartViewModel by activityViewModels()
+
     private lateinit var adapter: ProductCardAdapter
 
     override fun onCreateView(
@@ -29,7 +33,7 @@ class SelectProductsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val repo = ProductRepository(SupabaseClient.supabase)
-        viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+        productViewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 @Suppress("UNCHECKED_CAST")
                 return ProductViewModel(repo) as T
@@ -39,12 +43,18 @@ class SelectProductsFragment : Fragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.rvProducts)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        viewModel.products.observe(viewLifecycleOwner) { products ->
+        productViewModel.products.observe(viewLifecycleOwner) { products ->
             adapter = ProductCardAdapter(products) { product ->
-                (activity as? MakeSaleActivity)?.increaseCartCount()            }
+                cartViewModel.addItemToCart(
+                    product.id,
+                    product.name,
+                    product.imageUrl.toString(),
+                    product.sellingPrice
+                )
+            }
             recyclerView.adapter = adapter
         }
 
-        viewModel.loadProducts()
+        productViewModel.loadProducts()
     }
 }

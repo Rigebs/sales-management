@@ -16,10 +16,14 @@
         <action
             android:id="@+id/action_generateSaleFragment_to_barcodeScannerFragment"
             app:destination="@id/barcodeScannerFragment" />
+
+        <action
+            android:id="@+id/action_generateSaleFragment_to_selectProductsFragment"
+            app:destination="@id/selectProductsFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/barcodeScannerFragment"
         android:name="com.rige.ui.BarcodeScannerFragment"
-        android:label="Scanner de productos" />
+        android:label="Scanner de productos"/>
 </navigation>

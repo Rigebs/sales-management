@@ -16,6 +16,8 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import com.google.mlkit.vision.barcode.common.Barcode
+
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -24,13 +26,20 @@ import androidx.navigation.fragment.findNavController
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.rige.R
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class BarcodeScannerFragment : Fragment() {
 
     private lateinit var previewView: PreviewView
-    private val scanner = BarcodeScanning.getClient()
+    private val scanner = BarcodeScanning.getClient(
+        com.google.mlkit.vision.barcode.BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(
+                Barcode.FORMAT_EAN_13,
+                Barcode.FORMAT_EAN_8,
+                Barcode.FORMAT_CODE_128,
+                Barcode.FORMAT_CODE_39
+            )
+            .build()
+    )
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()

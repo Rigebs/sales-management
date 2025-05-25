@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rige.R
 import com.rige.adapters.CartAdapter
-import com.rige.viewmodels.SaleViewModel
+import com.rige.viewmodels.CartViewModel
 import java.math.BigDecimal
 
 class GenerateSaleFragment : Fragment() {
 
-    private val viewModel: SaleViewModel by activityViewModels()
+    private val cartViewModel: CartViewModel by activityViewModels()
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: CartAdapter
@@ -41,16 +41,16 @@ class GenerateSaleFragment : Fragment() {
 
         adapter = CartAdapter(
             onQuantityChange = { item, newCount ->
-                viewModel.updateItemQuantity(item.productId, newCount)
+                cartViewModel.updateItemQuantity(item.productId, newCount)
             },
             onDelete = { item ->
-                viewModel.removeItemFromCart(item.productId)
+                cartViewModel.removeItemFromCart(item.productId)
             }
         )
 
         recyclerView.adapter = adapter
 
-        viewModel.cart.observe(viewLifecycleOwner) { products ->
+        cartViewModel.cart.observe(viewLifecycleOwner) { products ->
             adapter.submitList(products.toList())
             val total = products.sumOf { it.price.multiply(BigDecimal(it.count)) }
             txtTotal.text = "Total: s/. ${total}"
@@ -59,15 +59,15 @@ class GenerateSaleFragment : Fragment() {
         parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
             val barcode = bundle.getString("barcode") ?: return@setFragmentResultListener
             println("BARCODE: $barcode")
-            viewModel.addProductByBarcode(barcode)
+            cartViewModel.addProductByBarcode(barcode)
         }
 
         view.findViewById<Button>(R.id.btnScan).setOnClickListener {
             findNavController().navigate(R.id.action_generateSaleFragment_to_barcodeScannerFragment)
         }
 
-        view.findViewById<Button>(R.id.btnPay).setOnClickListener {
-            // TODO: Procesar venta (confirmación, navegación o API)
+        view.findViewById<Button>(R.id.btnSearch).setOnClickListener {
+            findNavController().navigate(R.id.action_generateSaleFragment_to_selectProductsFragment)
         }
     }
 }

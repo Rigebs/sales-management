@@ -6,15 +6,38 @@
     android:layout_height="match_parent">
 
     <!-- Botón Escanear -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnScan"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="📷 Escanear código de barras"
+        android:text="Escanear"
+        app:icon="@drawable/ic_barcode"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnSearch"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="#E91E63"/>
+
+    <!-- Botón Buscar Productos -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSearch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Buscar"
+        app:icon="@drawable/ic_search"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnScan"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginHorizontal="16dp"/>
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#3F51B5" />
 
     <!-- Lista de productos en el carrito -->
     <androidx.recyclerview.widget.RecyclerView
@@ -26,6 +49,11 @@
         app:layout_constraintBottom_toTopOf="@id/cartSummary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/recyclerCart"/>
 
     <!-- Resumen carrito -->
     <LinearLayout
@@ -42,6 +70,7 @@
             android:id="@+id/txtTotal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:text="Total: s/. 0.00"
             android:textSize="18sp" />
 
@@ -50,6 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="PAGAR"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#009688"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
