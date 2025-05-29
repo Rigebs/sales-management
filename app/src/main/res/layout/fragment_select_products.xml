@@ -15,16 +15,24 @@
         android:layout_height="wrap_content"
         app:queryHint="Buscar productos..."/>
 
-    <!-- ChipGroup de Categorías -->
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupCategories"
+    <!-- Scroll horizontal para chips -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        app:singleSelection="true"
-        app:selectionRequired="false"
-        app:chipSpacing="8dp"
-        android:layout_marginBottom="6dp"/>
+        android:layout_marginBottom="6dp"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupCategories"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="false"
+            app:chipSpacing="8dp"
+            android:orientation="horizontal"/>
+    </HorizontalScrollView>
 
     <!-- Lista de productos -->
     <androidx.recyclerview.widget.RecyclerView

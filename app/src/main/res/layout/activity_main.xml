@@ -7,19 +7,58 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardGenerateSale"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_generate_sale"
+                android:contentDescription="Icono"
+                app:tint="?attr/colorOnSurface"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nueva venta"
+                android:textSize="18sp"
+                android:layout_marginStart="12dp"
+                android:textColor="?android:textColorPrimary"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <!-- Card 1: Ventas -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSales"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:focusable="true"
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"
         app:layout_constraintWidth_percent="0.48"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/cardGenerateSale"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,10 +95,12 @@
         android:foreground="?attr/selectableItemBackground"
         app:layout_constraintWidth_percent="0.48"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardGenerateSale"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/cardSales"
-        android:layout_marginStart="8dp">
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"

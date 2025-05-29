@@ -73,17 +73,8 @@ class ProductListFragment : Fragment() {
             loadCategoryChips(cats)
         }
 
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
-            override fun onQueryTextChange(newText: String?): Boolean {
-                val filtered = allProducts.filter {
-                    it.name.contains(newText ?: "", ignoreCase = true) ||
-                            (it.barCode?.contains(newText ?: "", ignoreCase = true) ?: false)
-                }
-                adapter.submitList(filtered)
-                return true
-            }
-        })
+        binding.searchView.isIconified = false
+        binding.searchView.clearFocus()
 
         listOf("Todos", "Activos", "Inactivos").forEachIndexed { i, estado ->
             val chip = Chip(requireContext()).apply {

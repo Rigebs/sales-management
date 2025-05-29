@@ -7,7 +7,7 @@
 
     <style name="Theme.SalesManagement" parent="Base.Theme.SalesManagement" />
 
-    <style name="Base" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="Base" parent="Theme.Material3.DayNight">
         <!-- otros atributos -->
     </style>
 </resources>

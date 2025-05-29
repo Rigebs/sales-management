@@ -34,6 +34,10 @@ class MakeSaleActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController)
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        }
+
         cartViewModel.cart.observe(this) { items ->
             cartItemCount = items.size
             updateCartBadge()
@@ -41,7 +45,12 @@ class MakeSaleActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        return if (!navController.navigateUp()) {
+            finish()
+            true
+        } else {
+            true
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

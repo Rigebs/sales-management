@@ -19,8 +19,7 @@
         app:layout_constraintEnd_toStartOf="@id/btnSearch"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#E91E63"/>
+        android:layout_marginEnd="8dp"/>
 
     <!-- Botón Buscar Productos -->
     <com.google.android.material.button.MaterialButton
@@ -36,8 +35,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#3F51B5" />
+        android:layout_marginTop="16dp"/>
 
     <!-- Lista de productos en el carrito -->
     <androidx.recyclerview.widget.RecyclerView
@@ -102,12 +100,61 @@
             android:text="Total: s/. 0.00"
             android:textSize="18sp" />
 
+        <LinearLayout
+            android:id="@+id/assignCustomerRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAssignCustomer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ASIGNAR CLIENTE"
+                style="?attr/materialButtonOutlinedStyle" />
+
+            <ImageView
+                android:id="@+id/btnClearCustomer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_close"
+                android:contentDescription="Quitar cliente"
+                android:padding="8dp"
+                android:visibility="gone"
+                android:layout_marginStart="8dp"
+                app:tint="?attr/colorError" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/paidSwitchContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pagado:"
+                android:layout_marginEnd="8dp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchPaid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/btnSell"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="VENDER"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="#009688"/>
+            android:layout_marginTop="8dp"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

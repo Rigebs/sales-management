@@ -6,9 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rige.models.Customer
 import com.rige.repositories.CustomerRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CustomerViewModel(private val repository: CustomerRepository) : ViewModel() {
+@HiltViewModel
+class CustomerViewModel@Inject constructor(
+    private val customerRepository: CustomerRepository
+) : ViewModel() {
 
     private val _customers = MutableLiveData<List<Customer>>()
     val customers: LiveData<List<Customer>> get() = _customers
@@ -25,7 +30,7 @@ class CustomerViewModel(private val repository: CustomerRepository) : ViewModel(
 
         viewModelScope.launch {
             try {
-                _customers.value = repository.findAll()
+                _customers.value = customerRepository.findAll()
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
