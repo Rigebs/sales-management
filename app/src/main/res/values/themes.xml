@@ -8,6 +8,19 @@
     <style name="Theme.SalesManagement" parent="Base.Theme.SalesManagement" />
 
     <style name="Base" parent="Theme.Material3.DayNight">
-        <!-- otros atributos -->
+        <item name="colorPrimary">@color/primary</item>
+
+        <item name="colorSurface">@color/white</item>
+
+        <item name="android:colorBackground">@color/white</item>
+
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <item name="actionBarStyle">@style/MyActionBar</item>
+    </style>
+
+    <style name="MyActionBar" parent="Widget.Material3.ActionBar.Solid">
+        <item name="background">@color/white</item>
     </style>
 </resources>

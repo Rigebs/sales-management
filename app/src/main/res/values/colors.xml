@@ -7,4 +7,7 @@
     <color name="red">#DE1515</color>
 
     <color name="darker_gray">#a9a9a9</color>
+
+    <!-- Primarios -->
+    <color name="primary">#009688</color>
 </resources>
