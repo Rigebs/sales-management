@@ -22,9 +22,10 @@ class SaleDetailRepository(private val client: SupabaseClient) {
             .decodeSingleOrNull()
     }
 
-    suspend fun save(saleDetail: SaleDetail) {
-        client.postgrest.from("sale_details")
-            .insert(saleDetail)
+    suspend fun saveAll(details: List<SaleDetail>) {
+        client.postgrest
+            .from("sale_details")
+            .insert(details)
     }
 
     suspend fun update(saleDetail: SaleDetail) {

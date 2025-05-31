@@ -20,5 +20,5 @@ data class Sale(
     @Serializable(with = BigDecimalSerializer::class)
     val total: BigDecimal,
 
-    @SerialName("customer_id") val customerId: String
+    @SerialName("customer_id") val customerId: String?
 )

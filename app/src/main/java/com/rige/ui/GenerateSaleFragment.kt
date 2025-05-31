@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -21,13 +22,19 @@ import com.rige.R
 import com.rige.adapters.CartAdapter
 import com.rige.adapters.CustomerAdapter
 import com.rige.models.Customer
+import com.rige.models.Sale
+import com.rige.models.SaleDetail
 import com.rige.viewmodels.CartViewModel
 import com.rige.viewmodels.CustomerViewModel
+import com.rige.viewmodels.SaleViewModel
+import org.threeten.bp.LocalDateTime
 import java.math.BigDecimal
+import java.util.UUID
 
 class GenerateSaleFragment : Fragment() {
 
     private val cartViewModel: CartViewModel by activityViewModels()
+    private val saleViewModel: SaleViewModel by activityViewModels()
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: CartAdapter
@@ -56,6 +63,55 @@ class GenerateSaleFragment : Fragment() {
         val btnAssignCustomer = view.findViewById<MaterialButton>(R.id.btnAssignCustomer)
         val paidSwitchContainer = view.findViewById<LinearLayout>(R.id.paidSwitchContainer)
         val btnClearCustomer = view.findViewById<ImageView>(R.id.btnClearCustomer)
+
+        val btnSell = view.findViewById<Button>(R.id.btnSell)
+        val switchPaid = view.findViewById<SwitchCompat>(R.id.switchPaid)
+
+        btnSell.setOnClickListener {
+            val cartItems = cartViewModel.cart.value ?: emptyList()
+
+            if (cartItems.isEmpty()) {
+                Toast.makeText(requireContext(), "No hay productos en el carrito.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val customer = selectedCustomer
+
+            val isPaid = switchPaid.isChecked
+            val saleId = UUID.randomUUID().toString()
+            val now = LocalDateTime.now()
+
+            val total = cartItems.sumOf { it.price.multiply(BigDecimal(it.count)) }
+
+            val sale = Sale(
+                id = saleId,
+                date = now,
+                isPaid = isPaid,
+                total = total,
+                customerId = customer?.id
+            )
+
+            val saleDetails = cartItems.map {
+                SaleDetail(
+                    id = UUID.randomUUID().toString(),
+                    quantity = it.count,
+                    unitPrice = it.price,
+                    subtotal = it.price.multiply(BigDecimal(it.count)),
+                    productId = it.productId,
+                    saleId = saleId
+                )
+            }
+
+            saleViewModel.saveSaleWithDetails(sale, saleDetails)
+
+            cartViewModel.clearCart()
+            selectedCustomer = null
+            btnAssignCustomer.text = "ASIGNAR CLIENTE"
+            paidSwitchContainer.visibility = View.GONE
+            btnClearCustomer.visibility = View.GONE
+
+            Toast.makeText(requireContext(), "Venta generada exitosamente.", Toast.LENGTH_SHORT).show()
+        }
 
         btnAssignCustomer.setOnClickListener {
             showCustomerDialog { customer ->
