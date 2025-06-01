@@ -1,6 +1,7 @@
 package com.rige.di
 
 import com.rige.BuildConfig
+import com.rige.repositories.BarcodeRepository
 import com.rige.repositories.CategoryRepository
 import com.rige.repositories.CustomerRepository
 import com.rige.repositories.ProductRepository
@@ -57,5 +58,11 @@ object AppModule {
     @Singleton
     fun provideSaleDetailRepository(client: io.github.jan.supabase.SupabaseClient): SaleDetailRepository {
         return SaleDetailRepository(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBarcodeRepository(client: io.github.jan.supabase.SupabaseClient): BarcodeRepository {
+        return BarcodeRepository(client)
     }
 }

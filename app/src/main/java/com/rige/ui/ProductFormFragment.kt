@@ -2,7 +2,6 @@ package com.rige.ui
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,22 +10,23 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.chip.Chip
+import com.rige.R
 import com.rige.databinding.FragmentProductFormBinding
 import com.rige.models.Product
 import com.rige.viewmodels.ProductViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import java.util.UUID
-import com.rige.R
 import com.rige.clients.CloudinaryClient
 import com.rige.models.Category
+import com.rige.viewmodels.BarcodeViewModel
 import com.rige.viewmodels.CategoryViewModel
 import java.io.File
 
@@ -36,6 +36,7 @@ class ProductFormFragment : Fragment() {
     private lateinit var binding: FragmentProductFormBinding
     private val viewModel: ProductViewModel by activityViewModels()
     private val categoryViewModel: CategoryViewModel by activityViewModels()
+    private val barcodeViewModel: BarcodeViewModel by activityViewModels()
 
     private var productId: String? = null
     private var currentProduct: Product? = null
@@ -58,7 +59,6 @@ class ProductFormFragment : Fragment() {
         return binding.root
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         productId = arguments?.getString("productId")
 
@@ -69,6 +69,8 @@ class ProductFormFragment : Fragment() {
                     if (!formInitialized) {
                         populateForm(it)
                         formInitialized = true
+                        barcodeViewModel.clearBarcodes()
+                        barcodeViewModel.loadBarcodesByProduct(id)
                     }
                 }
             }
@@ -80,7 +82,6 @@ class ProductFormFragment : Fragment() {
 
         binding.btnSave.setOnClickListener {
             val name = binding.etName.text.toString().trim()
-            val barCode = binding.etBarCode.text.toString().trim()
             val sellingPrice = binding.etSellingPrice.text.toString().toBigDecimalOrNull()
             val costPrice = binding.etCostPrice.text.toString().toBigDecimalOrNull()
             val quantity = binding.etQuantity.text.toString().toIntOrNull()
@@ -99,7 +100,6 @@ class ProductFormFragment : Fragment() {
 
             val product = currentProduct?.copy(
                 name = name,
-                barCode = barCode,
                 sellingPrice = sellingPrice,
                 costPrice = costPrice,
                 quantity = quantity,
@@ -110,7 +110,6 @@ class ProductFormFragment : Fragment() {
             ) ?: Product(
                 id = UUID.randomUUID().toString(),
                 name = name,
-                barCode = barCode,
                 sellingPrice = sellingPrice,
                 costPrice = costPrice,
                 quantity = quantity,
@@ -119,12 +118,19 @@ class ProductFormFragment : Fragment() {
                 categoryId = categoryId
             )
 
-            if (currentProduct == null) {
-                viewModel.saveProduct(product)
-            } else {
-                viewModel.updateProduct(product)
+            val productIdToUse = product.id
+
+            val action = {
+                barcodeViewModel.saveAllBarcodes(productIdToUse) {
+                    findNavController().popBackStack()
+                }
             }
-            findNavController().popBackStack()
+
+            if (currentProduct == null) {
+                viewModel.saveProduct(product, onComplete = action)
+            } else {
+                viewModel.updateProduct(product, onComplete = action)
+            }
         }
 
         imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -192,14 +198,19 @@ class ProductFormFragment : Fragment() {
             }
         }
 
-        binding.barcodeLayout.setEndIconOnClickListener {
+        binding.btnScanBarcode.setOnClickListener {
             findNavController().navigate(R.id.action_productFormFragment_to_barcodeScannerFragment)
         }
 
         parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
             val scannedBarcode = bundle.getString("barcode")
             scannedBarcode?.let {
-                binding.etBarCode.setText(it)
+                val currentCodes = barcodeViewModel.barcodes.value.orEmpty()
+                if (currentCodes.none { b -> b.code == it }) {
+                    barcodeViewModel.addBarcodeLocally(it)
+                } else {
+                    Toast.makeText(requireContext(), "Código ya escaneado", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -213,11 +224,35 @@ class ProductFormFragment : Fragment() {
                 binding.spinnerCategory.setText(selectedCategory.name, false)
             }
         }
+
+        barcodeViewModel.barcodes.observe(viewLifecycleOwner) { barcodes ->
+            binding.barcodeListContainer.removeAllViews()
+            barcodes.forEach { barcode ->
+                val chip = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.item_barcode_chip, binding.barcodeListContainer, false) as Chip
+                chip.text = barcode.code
+                chip.setOnCloseIconClickListener {
+                    barcodeViewModel.removeBarcodeLocally(barcode.code)
+                }
+                binding.barcodeListContainer.addView(chip)
+            }
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (imageUriPreview == null && currentProduct?.imageUrl?.isNotBlank() == true) {
+            binding.ivPreview.visibility = View.VISIBLE
+            Glide.with(this)
+                .load(currentProduct!!.imageUrl)
+                .into(binding.ivPreview)
+        }
     }
 
     private fun populateForm(product: Product) {
         binding.etName.setText(product.name)
-        binding.etBarCode.setText(product.barCode)
         binding.etSellingPrice.setText(String.format(Locale.getDefault(), "%.2f", product.sellingPrice))
         binding.etCostPrice.setText(String.format(Locale.getDefault(), "%.2f", product.costPrice))
         binding.etQuantity.setText(product.quantity.toString())

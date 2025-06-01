@@ -38,14 +38,6 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvBarCode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Código: 123456789"
-                android:textSize="14sp"
-                android:textColor="#666" />
-
-            <TextView
                 android:id="@+id/tvPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

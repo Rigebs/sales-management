@@ -21,7 +21,6 @@ class ProductCardAdapter(
     inner class ProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imgProduct: ImageView = view.findViewById(R.id.imgProduct)
         val tvProductName: TextView = view.findViewById(R.id.tvProductName)
-        val tvBarCode: TextView = view.findViewById(R.id.tvBarCode)
         val tvPrice: TextView = view.findViewById(R.id.tvPrice)
         val btnAddToCart: ImageButton = view.findViewById(R.id.btnAddToCart)
     }
@@ -36,7 +35,6 @@ class ProductCardAdapter(
         val product = getItem(position)
 
         holder.tvProductName.text = product.name
-        holder.tvBarCode.text = "Código: ${product.barCode}"
         holder.tvPrice.text = "s/. ${product.sellingPrice}"
 
         Glide.with(holder.imgProduct.context)

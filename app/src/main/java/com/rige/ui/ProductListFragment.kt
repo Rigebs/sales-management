@@ -169,8 +169,7 @@ class ProductListFragment : Fragment() {
                 "Inactivos" -> !product.status
                 else -> true
             }
-            val coincideBusqueda = product.name.contains(searchQuery, ignoreCase = true) ||
-                    (product.barCode?.contains(searchQuery, ignoreCase = true) ?: false)
+            val coincideBusqueda = product.name.contains(searchQuery, ignoreCase = true)
 
             coincideCategoria && coincideEstado && coincideBusqueda
         }

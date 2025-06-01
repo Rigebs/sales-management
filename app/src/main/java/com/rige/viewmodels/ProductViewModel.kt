@@ -54,19 +54,21 @@ class ProductViewModel @Inject constructor(
         return result
     }
 
-    fun saveProduct(product: Product) = viewModelScope.launch {
+    fun saveProduct(product: Product, onComplete: () -> Unit = {}) = viewModelScope.launch {
         try {
             repository.save(product)
             loadProducts()
+            onComplete()
         } catch (e: Exception) {
             Log.e("ProductVM", "Error guardando producto", e)
         }
     }
 
-    fun updateProduct(product: Product) = viewModelScope.launch {
+    fun updateProduct(product: Product, onComplete: (() -> Unit)? = null) = viewModelScope.launch {
         try {
             repository.update(product)
             loadProducts()
+            onComplete?.invoke()
         } catch (e: Exception) {
             Log.e("ProductVM", "Error actualizando producto", e)
         }

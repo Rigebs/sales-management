@@ -27,24 +27,51 @@
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Código de barras + botón -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/barcodeLayout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Encabezado y botón de escaneo en una sola fila -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Código de barras"
-            app:endIconMode="custom"
-            android:layout_marginVertical="8dp"
-            app:endIconDrawable="@drawable/ic_camera"
-            app:endIconContentDescription="Escanear código de barras" >
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etBarCode"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
-    </com.google.android.material.textfield.TextInputLayout>
+                android:layout_weight="1"
+                android:text="Códigos de barras:"
+
+                android:textSize="16sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScanBarcode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Escanear"
+                app:icon="@drawable/ic_camera"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                app:iconGravity="textStart"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <!-- Contenedor de códigos escaneados -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/barcodeListContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            app:flexWrap="wrap"
+            app:justifyContent="flex_start"
+            app:alignItems="flex_start"
+            android:orientation="horizontal" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
         <!-- Precio de venta -->
         <com.google.android.material.textfield.TextInputLayout

@@ -102,6 +102,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.json)
     implementation(libs.guava)
+
+    implementation (libs.flexbox)
 }
 
 kapt {
