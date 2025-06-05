@@ -19,9 +19,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.rige.models.Category
 import com.rige.viewmodels.CategoryViewModel
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class ProductListFragment : Fragment() {
 
     private lateinit var binding: FragmentProductListBinding
@@ -72,9 +70,6 @@ class ProductListFragment : Fragment() {
             categories = cats
             loadCategoryChips(cats)
         }
-
-        binding.searchView.isIconified = false
-        binding.searchView.clearFocus()
 
         listOf("Todos", "Activos", "Inactivos").forEachIndexed { i, estado ->
             val chip = Chip(requireContext()).apply {

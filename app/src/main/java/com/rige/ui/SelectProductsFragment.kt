@@ -50,6 +50,7 @@ class SelectProductsFragment : Fragment() {
             cartViewModel.addItemToCart(
                 product.id,
                 product.name,
+                product.quantity,
                 product.imageUrl.toString(),
                 product.sellingPrice
             )

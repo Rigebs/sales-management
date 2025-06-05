@@ -10,4 +10,7 @@
 
     <!-- Primarios -->
     <color name="primary">#009688</color>
+    <color name="primary_light">#B2DFDB</color>
+
+    <color name="primary_dark">#004D40</color> <!-- Más oscuro, buena base para fondo en dark -->
 </resources>

@@ -21,16 +21,15 @@ import com.rige.R
 import com.rige.databinding.FragmentProductFormBinding
 import com.rige.models.Product
 import com.rige.viewmodels.ProductViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import java.util.Locale
 import java.util.UUID
 import com.rige.clients.CloudinaryClient
+import com.rige.models.Barcode
 import com.rige.models.Category
+import com.rige.utils.formatDecimal
 import com.rige.viewmodels.BarcodeViewModel
 import com.rige.viewmodels.CategoryViewModel
 import java.io.File
 
-@AndroidEntryPoint
 class ProductFormFragment : Fragment() {
 
     private lateinit var binding: FragmentProductFormBinding
@@ -40,147 +39,69 @@ class ProductFormFragment : Fragment() {
 
     private var productId: String? = null
     private var currentProduct: Product? = null
-
     private var formInitialized = false
-
     private var selectedImageUrl: String? = null
-
+    private var imageUriPreview: Uri? = null
+    private var cameraImageUri: Uri? = null
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
 
-    private var imageUriPreview: Uri? = null
-
-    private var cameraImageUri: Uri? = null
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentProductFormBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         productId = arguments?.getString("productId")
-
-        productId?.let { id ->
-            viewModel.getProductById(id).observe(viewLifecycleOwner) { product ->
-                product?.let {
-                    currentProduct = it
-                    if (!formInitialized) {
-                        populateForm(it)
-                        formInitialized = true
-                        barcodeViewModel.clearBarcodes()
-                        barcodeViewModel.loadBarcodesByProduct(id)
-                    }
-                }
-            }
-        }
+        setupImagePickerLauncher()
+        setupObservers()
+        setupListeners()
+        categoryViewModel.loadCategories()
 
         if (productId == null) {
+            barcodeViewModel.clearBarcodes()
             binding.cbStatus.isChecked = true
+        } else {
+            loadProduct(productId!!)
+        }
+    }
+
+    private fun setupObservers() {
+        categoryViewModel.categories.observe(viewLifecycleOwner) { categories ->
+            setupCategorySpinner(categories)
+            currentProduct?.let { populateForm(it) }
         }
 
-        binding.btnSave.setOnClickListener {
-            val name = binding.etName.text.toString().trim()
-            val sellingPrice = binding.etSellingPrice.text.toString().toBigDecimalOrNull()
-            val costPrice = binding.etCostPrice.text.toString().toBigDecimalOrNull()
-            val quantity = binding.etQuantity.text.toString().toIntOrNull()
-            val imageUrl = selectedImageUrl ?: currentProduct?.imageUrl.orEmpty()
-            val status = binding.cbStatus.isChecked
-
-            val selectedCategoryName = binding.spinnerCategory.text.toString()
-            val categoriesWithNone = listOf(Category(id = "", name = "Sin categoría")) + (categoryViewModel.categories.value ?: emptyList())
-            val selectedCategory = categoriesWithNone.find { it.name == selectedCategoryName }
-            val categoryId = selectedCategory?.id?.takeIf { it.isNotEmpty() }
-
-            if (name.isBlank() || sellingPrice == null || quantity == null) {
-                Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val product = currentProduct?.copy(
-                name = name,
-                sellingPrice = sellingPrice,
-                costPrice = costPrice,
-                quantity = quantity,
-                imageUrl = imageUrl,
-                status = status,
-                categoryId = categoryId,
-                id = currentProduct?.id ?: UUID.randomUUID().toString()
-            ) ?: Product(
-                id = UUID.randomUUID().toString(),
-                name = name,
-                sellingPrice = sellingPrice,
-                costPrice = costPrice,
-                quantity = quantity,
-                imageUrl = imageUrl,
-                status = status,
-                categoryId = categoryId
-            )
-
-            val productIdToUse = product.id
-
-            val action = {
-                barcodeViewModel.saveAllBarcodes(productIdToUse) {
-                    findNavController().popBackStack()
-                }
-            }
-
-            if (currentProduct == null) {
-                viewModel.saveProduct(product, onComplete = action)
-            } else {
-                viewModel.updateProduct(product, onComplete = action)
-            }
+        barcodeViewModel.barcodes.observe(viewLifecycleOwner) { barcodes ->
+            if (!formInitialized || currentProduct == null) return@observe
+            displayBarcodeChips(barcodes)
         }
 
-        imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                val dataUri = result.data?.data
-                val isFromCamera = dataUri == null && cameraImageUri != null
-
-                imageUriPreview = if (isFromCamera) cameraImageUri else dataUri
-
-                imageUriPreview?.let {
-                    binding.ivPreview.setImageURI(it)
-
-                    binding.ivPreview.visibility = View.VISIBLE
-                    binding.imageActionButtons.visibility = View.VISIBLE
-                    binding.btnSelectImage.visibility = View.GONE
-                }
+        parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
+            bundle.getString("barcode")?.let { code ->
+                val currentCodes = barcodeViewModel.barcodes.value.orEmpty()
+                if (currentCodes.none { it.code == code }) {
+                    if (productId != null) barcodeViewModel.saveBarcode(code, productId!!)
+                    else barcodeViewModel.addBarcodeLocally(code)
+                } else Toast.makeText(requireContext(), "Código ya escaneado", Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
-        binding.btnSelectImage.setOnClickListener {
-            val context = requireContext()
+    private fun setupListeners() = with(binding) {
+        btnSave.setOnClickListener { handleSaveClick() }
 
-            val galleryIntent = Intent(Intent.ACTION_PICK).apply {
-                type = "image/*"
-            }
+        btnSelectImage.setOnClickListener { launchImagePicker() }
 
-            val imageFile = File.createTempFile("product_", ".jpg", context.cacheDir)
-            cameraImageUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
-
-            val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                putExtra(android.provider.MediaStore.EXTRA_OUTPUT, cameraImageUri)
-                addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            }
-
-            val chooser = Intent.createChooser(galleryIntent, "Seleccionar imagen o tomar foto")
-            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
-
-            imagePickerLauncher.launch(chooser)
-        }
-
-        binding.btnCancelImage.setOnClickListener {
+        btnCancelImage.setOnClickListener {
             imageUriPreview = null
             selectedImageUrl = null
-            binding.ivPreview.setImageDrawable(null)
-            binding.ivPreview.visibility = View.GONE
-            binding.imageActionButtons.visibility = View.GONE
-            binding.btnSelectImage.visibility = View.VISIBLE
+            ivPreview.setImageDrawable(null)
+            ivPreview.visibility = View.GONE
+            imageActionButtons.visibility = View.GONE
+            btnSelectImage.visibility = View.VISIBLE
         }
 
-        binding.btnConfirmImage.setOnClickListener {
+        btnConfirmImage.setOnClickListener {
             imageUriPreview?.let { uri ->
                 CloudinaryClient.uploadImage(requireContext(), uri) { imageUrl ->
                     requireActivity().runOnUiThread {
@@ -190,96 +111,158 @@ class ProductFormFragment : Fragment() {
                         } else {
                             Toast.makeText(requireContext(), "Error al subir imagen", Toast.LENGTH_LONG).show()
                         }
-
-                        binding.imageActionButtons.visibility = View.GONE
-                        binding.btnSelectImage.visibility = View.VISIBLE
+                        imageActionButtons.visibility = View.GONE
+                        btnSelectImage.visibility = View.VISIBLE
                     }
                 }
             }
         }
 
-        binding.btnScanBarcode.setOnClickListener {
+        btnScanBarcode.setOnClickListener {
             findNavController().navigate(R.id.action_productFormFragment_to_barcodeScannerFragment)
         }
+    }
 
-        parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
-            val scannedBarcode = bundle.getString("barcode")
-            scannedBarcode?.let {
-                val currentCodes = barcodeViewModel.barcodes.value.orEmpty()
-                if (currentCodes.none { b -> b.code == it }) {
-                    barcodeViewModel.addBarcodeLocally(it)
-                } else {
-                    Toast.makeText(requireContext(), "Código ya escaneado", Toast.LENGTH_SHORT).show()
+    private fun setupImagePickerLauncher() {
+        imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                imageUriPreview = result.data?.data ?: cameraImageUri
+                imageUriPreview?.let {
+                    binding.ivPreview.setImageURI(it)
+                    binding.ivPreview.visibility = View.VISIBLE
+                    binding.imageActionButtons.visibility = View.VISIBLE
+                    binding.btnSelectImage.visibility = View.GONE
                 }
             }
         }
+    }
 
-        categoryViewModel.loadCategories()
-        categoryViewModel.categories.observe(viewLifecycleOwner) { categories ->
-            setupCategorySpinner(categories)
+    private fun launchImagePicker() {
+        val galleryIntent = Intent(Intent.ACTION_PICK).apply { type = "image/*" }
+        val imageFile = File.createTempFile("product_", ".jpg", requireContext().cacheDir)
+        cameraImageUri = FileProvider.getUriForFile(requireContext(), "${requireContext().packageName}.fileprovider", imageFile)
+        val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(android.provider.MediaStore.EXTRA_OUTPUT, cameraImageUri)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        }
+        val chooser = Intent.createChooser(galleryIntent, "Seleccionar imagen o tomar foto").apply {
+            putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
+        }
+        imagePickerLauncher.launch(chooser)
+    }
 
-            currentProduct?.let { product ->
-                val categoriesWithNone = listOf(Category(id = "", name = "Sin categoría")) + categories
-                val selectedCategory = categoriesWithNone.find { it.id == product.categoryId } ?: categoriesWithNone[0]
-                binding.spinnerCategory.setText(selectedCategory.name, false)
-            }
+    private fun handleSaveClick() {
+        val name = binding.etName.text.toString().trim()
+        val sellingPrice = binding.etSellingPrice.text.toString().toBigDecimalOrNull()
+        val costPrice = binding.etCostPrice.text.toString().toBigDecimalOrNull()
+        val quantity = binding.etQuantity.text.toString().toIntOrNull()
+        val imageUrl = selectedImageUrl ?: currentProduct?.imageUrl.orEmpty()
+        val status = binding.cbStatus.isChecked
+
+        val selectedCategoryName = binding.spinnerCategory.text.toString()
+        val categoryId = categoryViewModel.categories.value
+            ?.find { it.name == selectedCategoryName }
+            ?.id?.takeIf { it.isNotEmpty() }
+
+        if (name.isBlank() || sellingPrice == null || quantity == null) {
+            Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        barcodeViewModel.barcodes.observe(viewLifecycleOwner) { barcodes ->
-            binding.barcodeListContainer.removeAllViews()
-            barcodes.forEach { barcode ->
-                val chip = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.item_barcode_chip, binding.barcodeListContainer, false) as Chip
-                chip.text = barcode.code
-                chip.setOnCloseIconClickListener {
-                    barcodeViewModel.removeBarcodeLocally(barcode.code)
+        val newProduct = (currentProduct?.copy(
+            name = name,
+            sellingPrice = sellingPrice,
+            costPrice = costPrice,
+            quantity = quantity,
+            imageUrl = imageUrl,
+            status = status,
+            categoryId = categoryId
+        ) ?: Product(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            sellingPrice = sellingPrice,
+            costPrice = costPrice,
+            quantity = quantity,
+            imageUrl = imageUrl,
+            status = status,
+            categoryId = categoryId
+        ))
+
+        if (currentProduct == newProduct) {
+            findNavController().popBackStack()
+            return
+        }
+
+        if (currentProduct == null) {
+            viewModel.saveProduct(newProduct) {
+                barcodeViewModel.saveAllBarcodes(newProduct.id) {
+                    findNavController().popBackStack()
                 }
-                binding.barcodeListContainer.addView(chip)
+            }
+        } else {
+            viewModel.updateProduct(newProduct) {
+                findNavController().popBackStack()
             }
         }
-
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        if (imageUriPreview == null && currentProduct?.imageUrl?.isNotBlank() == true) {
-            binding.ivPreview.visibility = View.VISIBLE
-            Glide.with(this)
-                .load(currentProduct!!.imageUrl)
-                .into(binding.ivPreview)
+    private fun loadProduct(id: String) {
+        viewModel.getProductById(id).observe(viewLifecycleOwner) { product ->
+            product?.let {
+                currentProduct = it
+                if (!formInitialized) {
+                    populateForm(it)
+                    formInitialized = true
+                    barcodeViewModel.clearBarcodes()
+                    barcodeViewModel.loadBarcodesByProduct(id)
+                }
+            }
         }
     }
 
-    private fun populateForm(product: Product) {
-        binding.etName.setText(product.name)
-        binding.etSellingPrice.setText(String.format(Locale.getDefault(), "%.2f", product.sellingPrice))
-        binding.etCostPrice.setText(String.format(Locale.getDefault(), "%.2f", product.costPrice))
-        binding.etQuantity.setText(product.quantity.toString())
+    private fun populateForm(product: Product) = with(binding) {
+        etName.setText(product.name)
+        etSellingPrice.setText(product.sellingPrice.formatDecimal())
+        etCostPrice.setText(product.costPrice?.formatDecimal())
+        etQuantity.setText(product.quantity.toString())
+        cbStatus.isChecked = product.status
+
         if (!product.imageUrl.isNullOrBlank()) {
-            binding.ivPreview.visibility = View.VISIBLE
-            Glide.with(this)
+            Glide.with(this@ProductFormFragment)
                 .load(product.imageUrl)
-                .into(binding.ivPreview)
-
-            binding.btnSelectImage.visibility = View.VISIBLE
+                .into(ivPreview)
+            ivPreview.visibility = View.VISIBLE
         }
-        binding.cbStatus.isChecked = product.status
-        val categories = categoryViewModel.categories.value
-        categories?.let {
-            val categoriesWithNone = listOf(Category(id = "", name = "Sin categoría")) + it
-            val selectedCategory = categoriesWithNone.find { c -> c.id == product.categoryId } ?: categoriesWithNone[0]
-            binding.spinnerCategory.setText(selectedCategory.name, false)
+
+        categoryViewModel.categories.value?.let { categories ->
+            val selectedCategory = categories.find { it.id == product.categoryId }
+            spinnerCategory.setText(selectedCategory?.name ?: "Sin categoría", false)
         }
     }
 
     private fun setupCategorySpinner(categories: List<Category>) {
-        val categoriesWithNone = listOf(Category(id = "", name = "Sin categoría")) + categories
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_list_item_1,
-            categoriesWithNone.map { it.name }
+            listOf("Sin categoría") + categories.map { it.name }
         )
         binding.spinnerCategory.setAdapter(adapter)
+    }
+
+    private fun displayBarcodeChips(barcodes: List<Barcode>) {
+        with(binding.barcodeListContainer) {
+            removeAllViews()
+            visibility = if (barcodes.isEmpty()) View.GONE else View.VISIBLE
+            barcodes.forEach { barcode ->
+                val chip = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.item_barcode_chip, this, false) as Chip
+                chip.text = barcode.code
+                chip.setOnCloseIconClickListener {
+                    if (productId != null) barcodeViewModel.deleteBarcode(barcode.id)
+                    else barcodeViewModel.removeBarcodeLocally(barcode.code)
+                }
+                addView(chip)
+            }
+        }
     }
 }

@@ -21,14 +21,14 @@ class CartViewModel @Inject constructor(
     private val _cart = MutableLiveData<List<CartItem>>(emptyList())
     val cart: LiveData<List<CartItem>> get() = _cart
 
-    fun addItemToCart(productId: String, name: String, imageUrl: String, price: BigDecimal) {
+    fun addItemToCart(productId: String, name: String, stock: Int, imageUrl: String, price: BigDecimal) {
         val current = _cart.value?.toMutableList() ?: mutableListOf()
         val index = current.indexOfFirst { it.productId == productId }
         if (index != -1) {
             val updatedItem = current[index].copy(count = current[index].count + 1)
             current[index] = updatedItem
         } else {
-            current.add(CartItem(productId, name, imageUrl, price, count = 1))
+            current.add(CartItem(productId, name, stock, imageUrl, price, count = 1))
         }
         _cart.value = current
     }
@@ -55,7 +55,29 @@ class CartViewModel @Inject constructor(
         viewModelScope.launch {
             val product = productRepository.findByBarcode(barcode)
             if (product != null) {
-                addItemToCart(product.id, product.name, product.imageUrl.toString(), product.sellingPrice)
+                val currentCart = _cart.value.orEmpty()
+                val existingItem = currentCart.find { it.productId == product.id }
+
+                if (existingItem != null) {
+                    val newCount = existingItem.count + 1
+                    if (newCount <= product.quantity) {
+                        updateItemQuantity(product.id, newCount)
+                    } else {
+                        Toast.makeText(context, "Stock máximo alcanzado para '${product.name}'.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    if (product.quantity > 0) {
+                        addItemToCart(
+                            product.id,
+                            product.name,
+                            product.quantity,
+                            product.imageUrl.toString(),
+                            product.sellingPrice
+                        )
+                    } else {
+                        Toast.makeText(context, "Producto sin stock disponible.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } else {
                 Toast.makeText(context, "Producto no encontrado con ese código", Toast.LENGTH_SHORT).show()
             }

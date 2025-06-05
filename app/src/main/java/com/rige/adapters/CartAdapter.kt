@@ -25,6 +25,7 @@ class CartAdapter(
         private val txtPrice: TextView = view.findViewById(R.id.txtPrice)
         private val txtSubtotal: TextView = view.findViewById(R.id.txtSubtotal)
         private val txtCount: TextView = view.findViewById(R.id.txtQuantity)
+        private val txtStock: TextView = view.findViewById(R.id.txtStock)
         private val btnIncrease: ImageButton = view.findViewById(R.id.btnIncrease)
         private val btnDecrease: ImageButton = view.findViewById(R.id.btnDecrease)
         private val btnDelete: ImageButton = view.findViewById(R.id.btnDelete)
@@ -35,6 +36,8 @@ class CartAdapter(
             val subtotal = item.price.multiply(BigDecimal(item.count))
             txtSubtotal.text = "Subtotal: s/. ${"%.2f".format(subtotal)}"
             txtCount.text = item.count.toString()
+
+            txtStock.text = "Stock: ${item.stock}"
 
             Glide.with(itemView.context)
                 .load(item.imageUrl)

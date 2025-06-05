@@ -48,12 +48,21 @@
                 android:layout_marginTop="2dp" />
 
             <TextView
+                android:id="@+id/txtStock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stock: 0"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
                 android:id="@+id/txtSubtotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Subtotal: s/. 0.00"
                 android:textSize="14sp"
-                android:layout_marginTop="2dp" />
+                android:layout_marginTop="2dp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <!-- Controles -->

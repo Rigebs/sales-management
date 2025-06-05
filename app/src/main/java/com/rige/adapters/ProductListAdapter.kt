@@ -28,11 +28,15 @@ class ProductListAdapter(
             }
             binding.centerIcon.setImageResource(statusIconRes)
 
-            Glide.with(binding.productImage.context)
-                .load(product.imageUrl)
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .error(R.drawable.ic_broken_image)
-                .into(binding.productImage)
+            if (!product.imageUrl.isNullOrBlank()) {
+                Glide.with(binding.productImage.context)
+                    .load(product.imageUrl)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_broken_image)
+                    .into(binding.productImage)
+            } else {
+                binding.productImage.setImageResource(R.drawable.ic_broken_image)
+            }
 
             binding.centerIcon.setOnClickListener { onStatusClick(product) }
 

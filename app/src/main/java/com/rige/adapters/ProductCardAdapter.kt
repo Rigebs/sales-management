@@ -37,10 +37,15 @@ class ProductCardAdapter(
         holder.tvProductName.text = product.name
         holder.tvPrice.text = "s/. ${product.sellingPrice}"
 
-        Glide.with(holder.imgProduct.context)
-            .load(product.imageUrl)
-            .placeholder(R.drawable.ic_broken_image)
-            .into(holder.imgProduct)
+        if (!product.imageUrl.isNullOrBlank()) {
+            Glide.with(holder.imgProduct.context)
+                .load(product.imageUrl)
+                .placeholder(R.drawable.ic_broken_image)
+                .error(R.drawable.ic_broken_image)
+                .into(holder.imgProduct)
+        } else {
+            holder.imgProduct.setImageResource(R.drawable.ic_broken_image)
+        }
 
         holder.btnAddToCart.setOnClickListener {
             onAddClicked(product)

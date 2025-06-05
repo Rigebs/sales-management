@@ -131,7 +131,11 @@ class GenerateSaleFragment : Fragment() {
 
         adapter = CartAdapter(
             onQuantityChange = { item, newCount ->
-                cartViewModel.updateItemQuantity(item.productId, newCount)
+                if (newCount <= item.stock) {
+                    cartViewModel.updateItemQuantity(item.productId, newCount)
+                } else {
+                    Toast.makeText(requireContext(), "Solo hay ${item.stock} unidades disponibles.", Toast.LENGTH_SHORT).show()
+                }
             },
             onDelete = { item ->
                 cartViewModel.removeItemFromCart(item.productId)

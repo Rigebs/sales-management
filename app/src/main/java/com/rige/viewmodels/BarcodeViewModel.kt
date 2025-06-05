@@ -1,5 +1,6 @@
 package com.rige.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,7 +34,7 @@ class BarcodeViewModel @Inject constructor(
                 Barcode(
                     id = UUID.randomUUID().toString(),
                     code = barcode,
-                    productId = "" // todavía no asignado si el producto es nuevo
+                    productId = ""
                 )
             )
             _barcodes.value = currentList
@@ -45,6 +46,20 @@ class BarcodeViewModel @Inject constructor(
         _barcodes.value = currentList.filterNot { it.code == barcode }
     }
 
+    fun saveBarcode(code: String, productId: String) = viewModelScope.launch {
+        try {
+            val newBarcode = Barcode(
+                id = UUID.randomUUID().toString(),
+                code = code,
+                productId = productId
+            )
+            barcodeRepository.save(newBarcode)
+            loadBarcodesByProduct(productId)
+        } catch (e: Exception) {
+            Log.e("ProductVM", "Error guardando producto", e)
+        }
+    }
+
     fun saveAllBarcodes(productId: String, onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             val toSave = _barcodes.value.orEmpty().map {
@@ -52,6 +67,18 @@ class BarcodeViewModel @Inject constructor(
             }
             barcodeRepository.saveAll(toSave)
             onComplete()
+        }
+    }
+
+    fun deleteBarcode(barcodeId: String) = viewModelScope.launch {
+        try {
+            barcodeRepository.deleteById(barcodeId)
+            val currentProductId = barcodes.value?.firstOrNull()?.productId
+            currentProductId?.let {
+                loadBarcodesByProduct(it)
+            }
+        } catch (e: Exception) {
+            Log.e("ProductVM", "Error guardando producto", e)
         }
     }
 

@@ -12,12 +12,20 @@
 
         <item name="colorSurface">@color/white</item>
 
+        <item name="colorPrimaryContainer">@color/primary</item>
+
+        <item name="colorOnPrimaryContainer">@color/white</item>
+
         <item name="android:colorBackground">@color/white</item>
 
         <item name="colorSecondary">@color/white</item>
         <item name="colorOnSecondary">@color/white</item>
 
         <item name="actionBarStyle">@style/MyActionBar</item>
+
+        <item name="colorOutline">@color/primary_light</item>
+
+        <item name="colorSecondaryContainer">@color/primary_light</item>
     </style>
 
     <style name="MyActionBar" parent="Widget.Material3.ActionBar.Solid">
