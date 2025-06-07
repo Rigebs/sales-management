@@ -21,8 +21,11 @@
         android:theme="@style/Base"
         tools:targetApi="31">
         <activity
+            android:name=".ui.CustomersActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.ProductsActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".ui.MakeSaleActivity"
             android:exported="false" />

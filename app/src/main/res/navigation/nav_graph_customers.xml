@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_customers"
+    app:startDestination="@id/customerListFragment">
+
+    <fragment
+        android:id="@+id/customerFormFragment"
+        android:name="com.rige.ui.CustomerFormFragment"
+        android:label="Formulario de customer">
+    </fragment>
+
+    <fragment
+        android:id="@+id/customerListFragment"
+        android:name="com.rige.ui.CustomerListFragment"
+        android:label="Lista de clientes">
+
+        <action
+            android:id="@+id/actionToFormCustomer"
+            app:destination="@id/customerFormFragment">
+            <argument
+                android:name="customerId"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+</navigation>

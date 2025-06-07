@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
+            android:layout_marginVertical="8dp">
 
             <TextView
                 android:layout_width="0dp"
@@ -63,7 +63,6 @@
             android:id="@+id/barcodeListContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
             app:flexWrap="wrap"
             app:justifyContent="flex_start"
             app:alignItems="flex_start"
