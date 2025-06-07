@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_sales"
+    app:startDestination="@id/saleListFragment">
+
+    <fragment
+        android:id="@+id/saleListFragment"
+        android:name="com.rige.ui.SaleListFragment"
+        android:label="Lista de ventas"/>
+
+</navigation>

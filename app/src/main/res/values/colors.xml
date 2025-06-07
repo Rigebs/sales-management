@@ -13,4 +13,9 @@
     <color name="primary_light">#B2DFDB</color>
 
     <color name="primary_dark">#004D40</color> <!-- Más oscuro, buena base para fondo en dark -->
+
+    <color name="green_500">#4CAF50</color>
+
+    <!-- Rojo Material -->
+    <color name="red_500">#F44336</color>
 </resources>

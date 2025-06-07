@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rige.models.Sale
+import com.rige.models.SaleCustomer
 import com.rige.models.SaleDetail
 import com.rige.repositories.SaleDetailRepository
 import com.rige.repositories.SaleRepository
@@ -27,6 +28,9 @@ class SaleViewModel @Inject constructor(
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
 
+    private val _salesWithCustomer = MutableLiveData<List<SaleCustomer>>()
+    val salesWithCustomer: LiveData<List<SaleCustomer>> get() = _salesWithCustomer
+
     fun loadSales() {
         _isLoading.value = true
         _error.value = null
@@ -42,11 +46,46 @@ class SaleViewModel @Inject constructor(
         }
     }
 
+    fun loadSalesWithCustomer() {
+        _isLoading.value = true
+        _error.value = null
+
+        viewModelScope.launch {
+            try {
+                val sales = repository.findAllWithCustomer()
+                    .sortedByDescending { it.date }
+                _salesWithCustomer.value = sales
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun saveSaleWithDetails(sale: Sale, details: List<SaleDetail>) {
         viewModelScope.launch {
             try {
                 repository.save(sale)
                 saleDetailViewModel.saveAll(details)
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+
+    fun toggleSaleStatus(sale: SaleCustomer) {
+        viewModelScope.launch {
+            try {
+                val updatedSale = Sale(
+                    id = sale.id,
+                    date = sale.date,
+                    total = sale.total,
+                    customerId = sale.customerId,
+                    isPaid = !sale.isPaid
+                )
+                repository.update(updatedSale)
+                loadSalesWithCustomer()
             } catch (e: Exception) {
                 _error.value = e.message
             }

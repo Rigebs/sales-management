@@ -8,6 +8,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rige.ui.CustomersActivity
 import com.rige.ui.MakeSaleActivity
 import com.rige.ui.ProductsActivity
+import com.rige.ui.SalesActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -28,6 +29,10 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<MaterialCardView>(R.id.cardCustomers).setOnClickListener {
             startActivity(Intent(this, CustomersActivity::class.java))
+        }
+
+        findViewById<MaterialCardView>(R.id.cardSales).setOnClickListener {
+            startActivity(Intent(this, SalesActivity::class.java))
         }
     }
 }

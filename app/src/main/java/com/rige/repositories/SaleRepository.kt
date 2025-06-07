@@ -1,8 +1,10 @@
 package com.rige.repositories
 
 import com.rige.models.Sale
+import com.rige.models.SaleCustomer
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Order
 
 class SaleRepository(private val client: SupabaseClient) {
 
@@ -21,6 +23,15 @@ class SaleRepository(private val client: SupabaseClient) {
             }
             .decodeSingleOrNull()
     }
+
+    suspend fun findAllWithCustomer(): List<SaleCustomer> {
+        return client.postgrest.from("sale_with_customer")
+            .select {
+                order("date", Order.DESCENDING)
+            }
+            .decodeList()
+    }
+
 
     suspend fun save(sale: Sale) {
         client.postgrest.from("sales")
