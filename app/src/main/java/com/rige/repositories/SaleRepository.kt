@@ -32,6 +32,45 @@ class SaleRepository(private val client: SupabaseClient) {
             .decodeList()
     }
 
+    suspend fun findPagedWithFilters(
+        page: Int,
+        pageSize: Int,
+        searchQuery: String,
+        isPaid: Boolean?
+    ): List<SaleCustomer> {
+        val fromIndex = page * pageSize
+        val toIndex = fromIndex + pageSize - 1
+
+        val result = client.postgrest.from("sale_with_customer")
+            .select {
+                order("date", Order.DESCENDING)
+                range(fromIndex.toLong(), toIndex.toLong())
+                filter {
+                    if (searchQuery.isNotEmpty()) {
+                        ilike("customer_name", "%$searchQuery%")
+                    }
+                    if (isPaid != null) {
+                        eq("is_paid", isPaid)
+                    }
+                }
+            }
+            .decodeList<SaleCustomer>()
+
+        println("✅ Returned ${result.size} items from Supabase")
+        return result
+    }
+
+    suspend fun findPaged(page: Int, pageSize: Int): List<SaleCustomer> {
+        val fromIndex = page * pageSize
+        val toIndex = fromIndex + pageSize - 1
+
+        return client.postgrest.from("sale_with_customer")
+            .select {
+                order("date", Order.DESCENDING)
+                range(fromIndex.toLong(), toIndex.toLong())
+            }
+            .decodeList()
+    }
 
     suspend fun save(sale: Sale) {
         client.postgrest.from("sales")

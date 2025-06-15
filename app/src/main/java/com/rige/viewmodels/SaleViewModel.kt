@@ -16,28 +16,55 @@ import javax.inject.Inject
 @HiltViewModel
 class SaleViewModel @Inject constructor(
     private val repository: SaleRepository,
-    private val saleDetailViewModel: SaleDetailRepository
+    private val saleDetailRepository: SaleDetailRepository
 ) : ViewModel() {
 
-    private val _sales = MutableLiveData<List<Sale>>()
-    val sales: LiveData<List<Sale>> get() = _sales
+    private val _pagedSales = MutableLiveData<List<SaleCustomer>>()
+    val pagedSales: LiveData<List<SaleCustomer>> = _pagedSales
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> get() = _isLoading
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _isLastPage = MutableLiveData(false)
+    val isLastPage: LiveData<Boolean> = _isLastPage
 
     private val _error = MutableLiveData<String?>()
-    val error: LiveData<String?> get() = _error
+    val error: LiveData<String?> = _error
 
-    private val _salesWithCustomer = MutableLiveData<List<SaleCustomer>>()
-    val salesWithCustomer: LiveData<List<SaleCustomer>> get() = _salesWithCustomer
+    private var currentPage = 0
+    private val pageSize = 10
+    private var currentQuery = ""
+    private var currentIsPaid: Boolean? = null
 
-    fun loadSales() {
+    fun resetAndLoad(query: String = "", isPaid: Boolean? = null) {
+        currentPage = 0
+        currentQuery = query
+        currentIsPaid = isPaid
+        _pagedSales.value = emptyList()
+        _isLastPage.value = false
+        loadNextPage()
+    }
+
+    val currentIsPaidFilter: Boolean?
+        get() = currentIsPaid
+
+    fun loadNextPageWithoutFilters() {
+        if (_isLoading.value == true || _isLastPage.value == true) return
+
         _isLoading.value = true
-        _error.value = null
-
         viewModelScope.launch {
             try {
-                _sales.value = repository.findAll()
+                val newPage = repository.findPaged(currentPage, pageSize)
+
+                val currentList = _pagedSales.value.orEmpty()
+                val updatedList = currentList + newPage
+                _pagedSales.value = updatedList
+
+                if (newPage.size < pageSize) {
+                    _isLastPage.value = true
+                } else {
+                    currentPage++
+                }
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
@@ -46,30 +73,32 @@ class SaleViewModel @Inject constructor(
         }
     }
 
-    fun loadSalesWithCustomer() {
-        _isLoading.value = true
-        _error.value = null
+    fun loadNextPage() {
+        if (_isLoading.value == true || _isLastPage.value == true) return
 
+        _isLoading.value = true
         viewModelScope.launch {
             try {
-                val sales = repository.findAllWithCustomer()
-                    .sortedByDescending { it.date }
-                _salesWithCustomer.value = sales
+                val newPage = repository.findPagedWithFilters(
+                    page = currentPage,
+                    pageSize = pageSize,
+                    searchQuery = currentQuery,
+                    isPaid = currentIsPaid
+                )
+
+                val currentList = _pagedSales.value.orEmpty()
+                val updatedList = currentList + newPage
+                _pagedSales.value = updatedList
+
+                if (newPage.size < pageSize) {
+                    _isLastPage.value = true
+                } else {
+                    currentPage++
+                }
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
                 _isLoading.value = false
-            }
-        }
-    }
-
-    fun saveSaleWithDetails(sale: Sale, details: List<SaleDetail>) {
-        viewModelScope.launch {
-            try {
-                repository.save(sale)
-                saleDetailViewModel.saveAll(details)
-            } catch (e: Exception) {
-                _error.value = e.message
             }
         }
     }
@@ -85,10 +114,76 @@ class SaleViewModel @Inject constructor(
                     isPaid = !sale.isPaid
                 )
                 repository.update(updatedSale)
-                loadSalesWithCustomer()
+
+                // Opcional: recargar con filtros actuales
+                resetAndLoad(currentQuery, currentIsPaid)
             } catch (e: Exception) {
                 _error.value = e.message
             }
+        }
+    }
+
+    fun saveSaleWithDetails(sale: Sale, details: List<SaleDetail>) {
+        viewModelScope.launch {
+            try {
+                repository.save(sale)
+                saleDetailRepository.saveAll(details)
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+
+    private fun loadUntilPageSize() {
+        if (_isLoading.value == true || _isLastPage.value == true) return
+
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                while (_pagedSales.value!!.size < pageSize && _isLastPage.value != true) {
+                    val newPage = repository.findPagedWithFilters(
+                        page = currentPage,
+                        pageSize = pageSize,
+                        searchQuery = currentQuery,
+                        isPaid = currentIsPaid
+                    )
+
+                    val updatedList = _pagedSales.value.orEmpty() + newPage
+                    _pagedSales.value = updatedList
+
+                    if (newPage.size < pageSize) {
+                        _isLastPage.value = true
+                    } else {
+                        currentPage++
+                    }
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun resetAndLoadWithLocalFilter(query: String = "", isPaid: Boolean? = null) {
+        currentPage = 0
+        currentQuery = query
+        currentIsPaid = isPaid
+        _pagedSales.value = emptyList()
+        _isLastPage.value = false
+
+        val currentData = _pagedSales.value.orEmpty()
+        val filtered = currentData.filter { sale ->
+            (isPaid == null || sale.isPaid == isPaid) &&
+                    (query.isBlank() || sale.customerName?.contains(query, ignoreCase = true) == true)
+        }
+
+        if (filtered.size >= pageSize) {
+            _pagedSales.value = filtered.take(pageSize)
+            _isLastPage.value = false
+        } else {
+            _pagedSales.value = filtered.toMutableList()
+            loadUntilPageSize()
         }
     }
 }
