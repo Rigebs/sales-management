@@ -64,12 +64,16 @@ class SaleRepository(private val client: SupabaseClient) {
         val fromIndex = page * pageSize
         val toIndex = fromIndex + pageSize - 1
 
-        return client.postgrest.from("sale_with_customer")
+        val sales = client.postgrest.from("sale_with_customer")
             .select {
                 order("date", Order.DESCENDING)
                 range(fromIndex.toLong(), toIndex.toLong())
             }
-            .decodeList()
+            .decodeList<SaleCustomer>()
+
+        println("CANTIDAD RECIBIDA: ${sales.size}")
+
+        return sales
     }
 
     suspend fun save(sale: Sale) {

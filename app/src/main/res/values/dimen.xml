@@ -1,0 +1,3 @@
+<resources>
+    <dimen name="actionbar_progress_size">4dp</dimen>
+</resources>
