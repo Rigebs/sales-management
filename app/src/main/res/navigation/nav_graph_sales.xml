@@ -8,5 +8,4 @@
         android:id="@+id/saleListFragment"
         android:name="com.rige.ui.SaleListFragment"
         android:label="Lista de ventas"/>
-
 </navigation>

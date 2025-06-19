@@ -60,7 +60,11 @@ class SaleRepository(private val client: SupabaseClient) {
         return result
     }
 
-    suspend fun findPaged(page: Int, pageSize: Int): List<SaleCustomer> {
+    suspend fun findPaged(page: Int,
+                          pageSize: Int,
+                          searchQuery: String?,
+                          isPaid: Boolean?
+    ): List<SaleCustomer> {
         val fromIndex = page * pageSize
         val toIndex = fromIndex + pageSize - 1
 
@@ -68,10 +72,19 @@ class SaleRepository(private val client: SupabaseClient) {
             .select {
                 order("date", Order.DESCENDING)
                 range(fromIndex.toLong(), toIndex.toLong())
+                filter {
+                    if (!searchQuery.isNullOrBlank()) {
+                        ilike("customer_name", "%$searchQuery%")
+                    }
+                    if (isPaid != null) {
+                        eq("is_paid", isPaid)
+                    }
+                }
             }
             .decodeList<SaleCustomer>()
 
         println("CANTIDAD RECIBIDA: ${sales.size}")
+        println("FILTROS: searchQuery = $searchQuery, isPaid = $isPaid")
 
         return sales
     }
