@@ -7,64 +7,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Filtros -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_marginBottom="8dp">
 
-        <!-- Campo de búsqueda + botón de filtros -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/searchInputLayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:startIconDrawable="@drawable/ic_search"
-                app:endIconMode="clear_text"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/searchCustomer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Buscar..." />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <ImageButton
-                android:id="@+id/btnMoreFilters"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Más filtros"
-                app:tint="?attr/colorOnSurface"
-                android:src="@drawable/ic_filter" />
-        </LinearLayout>
-
-        <!-- ChipGroup de filtros -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroup"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_weight="1"
             app:singleSelection="true"
-            app:selectionRequired="true"
-            android:layout_gravity="start">
+            app:selectionRequired="true">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checkable="true"
                 android:checked="true"
+                android:checkable="true"
                 android:text="Todos" />
 
             <com.google.android.material.chip.Chip
@@ -81,6 +44,16 @@
                 android:checkable="true"
                 android:text="Pendientes" />
         </com.google.android.material.chip.ChipGroup>
+
+        <ImageButton
+            android:id="@+id/btnMoreFilters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:contentDescription="Más filtros"
+            android:src="@drawable/ic_filter"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="?attr/colorOnSurface" />
     </LinearLayout>
 
     <!-- RecyclerView -->
@@ -89,5 +62,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/item_list_sale"
-        android:nestedScrollingEnabled="false"/>
+        android:nestedScrollingEnabled="false" />
+
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No hay ventas para mostrar"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:textSize="16sp"
+        android:paddingTop="32dp"
+        android:textColor="?android:textColorSecondary"/>
 </LinearLayout>

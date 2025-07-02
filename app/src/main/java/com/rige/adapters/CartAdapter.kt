@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rige.R
-import com.rige.models.CartItem
+import com.rige.models.extra.CartItem
 import java.math.BigDecimal
 
 class CartAdapter(

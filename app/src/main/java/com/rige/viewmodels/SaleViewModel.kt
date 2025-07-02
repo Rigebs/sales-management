@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.rige.models.Sale
 import com.rige.models.SaleCustomer
 import com.rige.models.SaleDetail
+import com.rige.models.extra.FilterOptions
 import com.rige.repositories.SaleDetailRepository
 import com.rige.repositories.SaleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,19 +35,31 @@ class SaleViewModel @Inject constructor(
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
-    fun loadNextPage(searchQuery: String? = null, isPaid: Boolean? = null) {
+    private var currentFilters = FilterOptions() // Filtros activos
+
+    fun refreshAndLoad(filters: FilterOptions = FilterOptions()) {
+        currentPage = 0
+        endReached = false
+        currentFilters = filters
+        _sales.postValue(emptyList()) // <- ESTA LÍNEA ES LA CLAVE
+        loadNextPage()
+    }
+    fun loadNextPage() {
         if (_isLoading.value == true || endReached) return
 
         _isLoading.value = true
 
         viewModelScope.launch {
             try {
-                val pageResult = repository.findPaged(currentPage, pageSize, searchQuery, isPaid)
+                val pageResult = repository.findPagedAdvanced(
+                    currentPage,
+                    pageSize,
+                    currentFilters
+                )
 
                 if (pageResult.isNotEmpty()) {
                     val currentList = _sales.value.orEmpty()
 
-                    // Evitar duplicados
                     val newItems = pageResult.filterNot { fetched ->
                         currentList.any { it.id == fetched.id }
                     }
@@ -63,7 +76,8 @@ class SaleViewModel @Inject constructor(
                     endReached = true
                 }
             } catch (e: Exception) {
-                Log.e("SaleViewModel2", "Error al cargar ventas", e)
+                Log.e("SaleViewModel", "Error al cargar ventas", e)
+                _error.postValue(e.message)
             } finally {
                 _isLoading.postValue(false)
             }
@@ -79,19 +93,6 @@ class SaleViewModel @Inject constructor(
                 _error.value = e.message
             }
         }
-    }
-
-    fun refreshAndLoad(searchQuery: String?, isPaid: Boolean?) {
-        currentPage = 0
-        endReached = false
-        _sales.value = emptyList()
-        loadNextPage(searchQuery, isPaid)
-    }
-
-    fun reset() {
-        currentPage = 0
-        endReached = false
-        _sales.value = emptyList()
     }
 
     fun ensureInitialDataLoaded() {

@@ -9,9 +9,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.rige.FilterCallback
 import com.rige.R
 import com.rige.adapters.SaleListAdapter
 import com.rige.databinding.FragmentSaleListBinding
+import com.rige.models.extra.FilterOptions
 import com.rige.viewmodels.SaleViewModel
 
 class SaleListFragment : Fragment() {
@@ -23,6 +25,8 @@ class SaleListFragment : Fragment() {
 
     private var currentFilter: Boolean? = null
     private var shouldScrollToTop = false
+
+    private var currentFilters = FilterOptions()
 
 
     override fun onCreateView(
@@ -57,11 +61,7 @@ class SaleListFragment : Fragment() {
                             (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 1
 
                         if (viewModel.isLoading.value != true && isLastItemVisible) {
-                            val searchText = binding.searchCustomer.text?.toString().orEmpty()
-                            viewModel.loadNextPage(
-                                searchQuery = searchText.takeIf { it.isNotBlank() },
-                                isPaid = currentFilter
-                            )
+                            viewModel.loadNextPage()
                         }
                     }
                 }
@@ -73,6 +73,12 @@ class SaleListFragment : Fragment() {
         viewModel.sales.observe(viewLifecycleOwner) { sales ->
             adapter.submitSales(sales)
 
+            val isLoading = viewModel.isLoading.value == true
+            val isEmpty = sales.isEmpty() && !isLoading
+
+            binding.tvEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
+            binding.rvSales.visibility = if (isEmpty) View.GONE else View.VISIBLE
+
             if ((isFirstDataLoad || shouldScrollToTop) && sales.isNotEmpty()) {
                 binding.rvSales.scrollToPosition(0)
                 isFirstDataLoad = false
@@ -81,7 +87,9 @@ class SaleListFragment : Fragment() {
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            adapter.showLoading(isLoading)
+            binding.rvSales.post {
+                adapter.showLoading(isLoading)
+            }
         }
     }
 
@@ -90,30 +98,44 @@ class SaleListFragment : Fragment() {
             applyFilter(checkedIds.firstOrNull())
         }
 
-        binding.searchCustomer.doOnTextChanged { text, _, _, _ ->
-            applySearchAndFilter()
+        binding.btnMoreFilters.setOnClickListener {
+            val bottomSheet = MoreFiltersBottomSheetFragment()
+            bottomSheet.setInitialFilters(currentFilters)
+            bottomSheet.filterCallback = object : FilterCallback {
+                override fun onFiltersApplied(filters: FilterOptions) {
+                    applyAdvancedFilters(filters)
+                }
+            }
+            bottomSheet.show(parentFragmentManager, "MoreFiltersBottomSheet")
+
         }
 
         applyFilter(binding.chipGroup.checkedChipId)
     }
 
     private fun applyFilter(chipId: Int?) {
-        currentFilter = when (chipId) {
+        val isPaid = when (chipId) {
             R.id.chipAll -> null
             R.id.chipPaid -> true
             R.id.chipUnpaid -> false
             else -> null
         }
+
+        currentFilters = currentFilters.copy(isPaid = isPaid)
         applySearchAndFilter()
     }
 
     private fun applySearchAndFilter() {
         shouldScrollToTop = true
-        val searchText = binding.searchCustomer.text?.toString().orEmpty()
+        viewModel.refreshAndLoad(currentFilters)
+    }
 
-        viewModel.refreshAndLoad(
-            searchQuery = searchText.takeIf { it.isNotBlank() },
-            isPaid = currentFilter
-        )
+    private fun applyAdvancedFilters(advancedFilters: FilterOptions) {
+        // Mantén el valor de isPaid del chip actual
+        val mergedFilters = advancedFilters.copy(isPaid = currentFilters.isPaid)
+
+        currentFilters = mergedFilters
+        shouldScrollToTop = true
+        viewModel.refreshAndLoad(currentFilters)
     }
 }

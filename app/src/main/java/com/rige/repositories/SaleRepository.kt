@@ -2,6 +2,7 @@ package com.rige.repositories
 
 import com.rige.models.Sale
 import com.rige.models.SaleCustomer
+import com.rige.models.extra.FilterOptions
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
@@ -62,7 +63,6 @@ class SaleRepository(private val client: SupabaseClient) {
 
     suspend fun findPaged(page: Int,
                           pageSize: Int,
-                          searchQuery: String?,
                           isPaid: Boolean?
     ): List<SaleCustomer> {
         val fromIndex = page * pageSize
@@ -73,9 +73,6 @@ class SaleRepository(private val client: SupabaseClient) {
                 order("date", Order.DESCENDING)
                 range(fromIndex.toLong(), toIndex.toLong())
                 filter {
-                    if (!searchQuery.isNullOrBlank()) {
-                        ilike("customer_name", "%$searchQuery%")
-                    }
                     if (isPaid != null) {
                         eq("is_paid", isPaid)
                     }
@@ -84,7 +81,7 @@ class SaleRepository(private val client: SupabaseClient) {
             .decodeList<SaleCustomer>()
 
         println("CANTIDAD RECIBIDA: ${sales.size}")
-        println("FILTROS: searchQuery = $searchQuery, isPaid = $isPaid")
+        println("FILTROS: isPaid = $isPaid")
 
         return sales
     }
@@ -94,15 +91,6 @@ class SaleRepository(private val client: SupabaseClient) {
             .insert(sale)
     }
 
-    suspend fun update(sale: Sale) {
-        client.postgrest.from("sales")
-            .update(sale) {
-                filter {
-                    eq("id", sale.id)
-                }
-            }
-    }
-
     suspend fun deleteById(id: String) {
         client.postgrest.from("sales")
             .delete {
@@ -110,5 +98,43 @@ class SaleRepository(private val client: SupabaseClient) {
                     eq("id", id)
                 }
             }
+    }
+
+    suspend fun findPagedAdvanced(
+        page: Int,
+        pageSize: Int,
+        filters: FilterOptions
+    ): List<SaleCustomer> {
+        val offset = page * pageSize
+        val to = offset + pageSize - 1
+
+        val query = client.postgrest.from("sale_with_customer").select {
+            order("date", Order.DESCENDING)
+            range(offset.toLong(), to.toLong())
+            filter {
+                filters.dateFrom?.let { dateFrom ->
+                    gte("date", dateFrom.toString())
+                }
+                filters.dateTo?.let { dateTo ->
+                    lte("date", dateTo.toString())
+                }
+                filters.amountMin?.let { min ->
+                    gte("total", min)
+                }
+                filters.amountMax?.let { max ->
+                    lte("total", max)
+                }
+                filters.isPaid?.let { paid ->
+                    eq("is_paid", paid)
+                }
+            }
+        }
+
+        val result = query.decodeList<SaleCustomer>()
+
+        println("🧪 ADVANCED QUERY RESULT: ${result.size}")
+        println("📍 Filters used: $filters")
+
+        return result
     }
 }

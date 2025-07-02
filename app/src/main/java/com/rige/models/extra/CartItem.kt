@@ -1,4 +1,4 @@
-package com.rige.models
+package com.rige.models.extra
 
 import java.math.BigDecimal
 
