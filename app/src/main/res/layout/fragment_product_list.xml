@@ -1,27 +1,35 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Contenedor vertical -->
+    <!-- Loading indicator -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <LinearLayout
+        android:id="@+id/contentContainer"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-        <!-- Buscador -->
+        <!-- SearchView -->
         <androidx.appcompat.widget.SearchView
             android:id="@+id/searchView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:queryHint="Buscar producto..."
+            app:queryHint="Buscar..."
             android:layout_marginBottom="8dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"/>
+            app:iconifiedByDefault="false" />
 
+        <!-- Category Chips -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,6 +45,7 @@
                 android:orientation="horizontal" />
         </HorizontalScrollView>
 
+        <!-- Status Chips -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroupStatus"
             android:layout_width="match_parent"
@@ -52,11 +61,11 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:clipToPadding="false"
-            android:paddingBottom="96dp"/>
-
+            android:paddingBottom="96dp"
+            tools:listitem="@layout/item_list_product"/>
     </LinearLayout>
 
-    <!-- FAB encima del contenido -->
+    <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddProduct"
         android:layout_width="wrap_content"

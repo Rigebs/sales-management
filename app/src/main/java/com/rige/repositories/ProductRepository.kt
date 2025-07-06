@@ -1,9 +1,12 @@
 package com.rige.repositories
 
 import com.rige.models.Product
+import com.rige.models.extra.ProductFilterOptions
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 
 class ProductRepository(private val client: SupabaseClient) {
 
@@ -11,6 +14,43 @@ class ProductRepository(private val client: SupabaseClient) {
         return client.postgrest.from("products")
             .select()
             .decodeList()
+    }
+
+    suspend fun findPagedProducts(
+        page: Int,
+        pageSize: Int,
+        filters: ProductFilterOptions
+    ): List<Product> {
+        val offset = page * pageSize
+        val to = offset + pageSize - 1
+
+        val query = client.postgrest.from("products").select {
+            range(offset.toLong(), to.toLong())
+            filter {
+                filters.nameContains?.let { name ->
+                    ilike("name", "%$name%")
+                }
+                filters.priceMin?.let { min ->
+                    gte("price", min)
+                }
+                filters.priceMax?.let { max ->
+                    lte("price", max)
+                }
+                filters.isActive?.let { active ->
+                    eq("status", active)
+                }
+                filters.categoryId?.let { catId ->
+                    eq("category_id", catId)
+                }
+            }
+        }
+
+        val result = query.decodeList<Product>()
+
+        println("🧪 PRODUCTS QUERY RESULT: ${result.size}")
+        println("📍 Filters used: $filters")
+
+        return result
     }
 
     suspend fun findById(id: String): Product? {
@@ -39,8 +79,13 @@ class ProductRepository(private val client: SupabaseClient) {
     }
 
     suspend fun save(product: Product) {
+        val userId = client.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("Usuario no autenticado")
+
+        val productWithUser = product.copy(userId = userId)
+
         client.postgrest.from("products")
-            .insert(product)
+            .insert(productWithUser)
     }
 
     suspend fun update(product: Product) {

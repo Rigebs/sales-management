@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,8 +17,10 @@ import com.rige.models.Product
 import com.rige.viewmodels.ProductViewModel
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.rige.models.Category
+import com.rige.models.extra.ProductFilterOptions
 import com.rige.viewmodels.CategoryViewModel
 
 class ProductListFragment : Fragment() {
@@ -33,6 +36,14 @@ class ProductListFragment : Fragment() {
     private var selectedCategoryId: String? = null
     private var selectedStatus: String = "Todos"
     private var searchQuery: String = ""
+
+    private var productsLoaded = false
+    private var categoriesLoaded = false
+
+    private var isFirstDataLoad = true
+    private var shouldScrollToTop = false
+
+    private var deepSearchTriggered = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,25 +61,29 @@ class ProductListFragment : Fragment() {
         },
             onStatusClick = { product ->
             showStatusConfirmationDialog(product)
-        })
+        },
+            onDeepSearchClick = {
+                deepSearchTriggered = true
+                applyFilters()
+            })
 
         binding.rvProducts.adapter = adapter
         binding.rvProducts.layoutManager = LinearLayoutManager(requireContext())
 
         categoryViewModel.loadCategories()
 
-        if (viewModel.products.value.isNullOrEmpty()) {
-            viewModel.loadProducts()
-        }
+        setupRecyclerView()
+        observeViewModel()
 
-        viewModel.products.observe(viewLifecycleOwner) { products ->
-            allProducts = products
-            adapter.submitList(products)
+        if (viewModel.products.value.isNullOrEmpty()) {
+            viewModel.refreshAndLoad()
         }
 
         categoryViewModel.categories.observe(viewLifecycleOwner) { cats ->
             categories = cats
+            categoriesLoaded = true
             loadCategoryChips(cats)
+            checkIfReadyToShowContent()
         }
 
         listOf("Todos", "Activos", "Inactivos").forEachIndexed { i, estado ->
@@ -110,9 +125,17 @@ class ProductListFragment : Fragment() {
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?) = false
+
             override fun onQueryTextChange(newText: String?): Boolean {
                 searchQuery = newText ?: ""
-                applyFilters()
+
+                if (searchQuery.isBlank()) {
+                    deepSearchTriggered = false
+                    applyFilters()
+                } else {
+                    filterLocally()
+                }
+
                 return true
             }
         })
@@ -157,18 +180,106 @@ class ProductListFragment : Fragment() {
     }
 
     private fun applyFilters() {
-        val result = allProducts.filter { product ->
-            val coincideCategoria = selectedCategoryId == null || product.categoryId == selectedCategoryId
-            val coincideEstado = when (selectedStatus) {
-                "Activos" -> product.status
-                "Inactivos" -> !product.status
-                else -> true
-            }
-            val coincideBusqueda = product.name.contains(searchQuery, ignoreCase = true)
+        val filters = ProductFilterOptions(
+            categoryId = selectedCategoryId,
+            isActive = when (selectedStatus) {
+                "Activos" -> true
+                "Inactivos" -> false
+                else -> null
+            },
+            nameContains = searchQuery.takeIf { it.isNotBlank() }
+        )
 
-            coincideCategoria && coincideEstado && coincideBusqueda
+        viewModel.refreshAndLoad(filters)
+        shouldScrollToTop = true
+    }
+
+    private fun checkIfReadyToShowContent() {
+        if (productsLoaded && categoriesLoaded) {
+            binding.progressBar.visibility = View.GONE
+            binding.contentContainer.visibility = View.VISIBLE
+        } else {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.contentContainer.visibility = View.GONE
+        }
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvProducts.apply {
+            adapter = this@ProductListFragment.adapter
+            layoutManager = LinearLayoutManager(requireContext())
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (dy > 0) {
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        val visibleItemCount = layoutManager.childCount
+                        val totalItemCount = layoutManager.itemCount
+                        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                        val isLastItemVisible =
+                            (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 1
+
+                        if (viewModel.isLoading.value != true && isLastItemVisible) {
+                            viewModel.loadNextPage()
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.products.observe(viewLifecycleOwner) { products ->
+            allProducts = products
+            adapter.submitList(products)
+
+            if ((isFirstDataLoad || shouldScrollToTop) && products.isNotEmpty()) {
+                binding.rvProducts.scrollToPosition(0)
+                isFirstDataLoad = false
+                shouldScrollToTop = false
+            }
+
+            productsLoaded = true
+            checkIfReadyToShowContent()
+
+            filterLocally(forceHideDeepSearch = deepSearchTriggered)
+            deepSearchTriggered = false
         }
 
-        adapter.submitList(result)
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.rvProducts.post {
+                adapter.showLoading(isLoading)
+            }
+
+            if (isLoading && viewModel.products.value.isNullOrEmpty()) {
+                binding.progressBar.visibility = View.VISIBLE
+                binding.contentContainer.visibility = View.GONE
+            } else {
+                binding.progressBar.visibility = View.GONE
+                binding.contentContainer.visibility = View.VISIBLE
+            }
+        }
+
+        viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
+            if (!errorMsg.isNullOrBlank()) {
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun filterLocally(forceHideDeepSearch: Boolean = false) {
+        val filtered = allProducts.filter {
+            it.name.contains(searchQuery, ignoreCase = true)
+        }
+
+        adapter.submitList(filtered)
+
+        adapter.setShowDeepSearchButton(
+            !forceHideDeepSearch &&
+                    searchQuery.isNotBlank() &&
+                    filtered.size < 10 &&
+                    viewModel.hasMore &&
+                    !deepSearchTriggered
+        )
     }
 }

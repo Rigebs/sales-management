@@ -40,6 +40,7 @@ class ProductFormFragment : Fragment() {
     private var productId: String? = null
     private var currentProduct: Product? = null
     private var formInitialized = false
+    private var barcodesInitialized = false
     private var selectedImageUrl: String? = null
     private var imageUriPreview: Uri? = null
     private var cameraImageUri: Uri? = null
@@ -58,11 +59,18 @@ class ProductFormFragment : Fragment() {
         categoryViewModel.loadCategories()
 
         if (productId == null) {
-            barcodeViewModel.clearBarcodes()
-            binding.cbStatus.isChecked = true
+            if (!formInitialized) {
+                binding.cbStatus.isChecked = true
+            }
+            if (!barcodesInitialized) {
+                barcodeViewModel.clearBarcodes()
+                barcodesInitialized = true
+            }
         } else {
+            barcodeViewModel.clearBarcodes()
             loadProduct(productId!!)
         }
+
     }
 
     private fun setupObservers() {
@@ -72,7 +80,6 @@ class ProductFormFragment : Fragment() {
         }
 
         barcodeViewModel.barcodes.observe(viewLifecycleOwner) { barcodes ->
-            if (!formInitialized || currentProduct == null) return@observe
             displayBarcodeChips(barcodes)
         }
 
@@ -213,8 +220,10 @@ class ProductFormFragment : Fragment() {
                 if (!formInitialized) {
                     populateForm(it)
                     formInitialized = true
-                    barcodeViewModel.clearBarcodes()
+                }
+                if (!barcodesInitialized) {
                     barcodeViewModel.loadBarcodesByProduct(id)
+                    barcodesInitialized = true
                 }
             }
         }

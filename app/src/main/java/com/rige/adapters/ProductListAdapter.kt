@@ -1,7 +1,9 @@
 package com.rige.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,10 +14,86 @@ import com.rige.models.Product
 
 class ProductListAdapter(
     val onEdit: (Product) -> Unit,
-    val onStatusClick: (Product) -> Unit
-) : ListAdapter<Product, ProductListAdapter.ProductViewHolder>(DiffCallback()) {
+    val onStatusClick: (Product) -> Unit,
+    val onDeepSearchClick: () -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    inner class ProductViewHolder(val binding: ItemListProductBinding) : RecyclerView.ViewHolder(binding.root) {
+    companion object {
+        private const val TYPE_ITEM = 0
+        private const val TYPE_LOADING = 1
+        private const val TYPE_DEEP_SEARCH = 2
+    }
+
+    private val products = mutableListOf<Product>()
+    private var showLoadingFooter = false
+
+    private var showDeepSearchButton = false
+
+    fun setShowDeepSearchButton(show: Boolean) {
+        if (show == showDeepSearchButton) return
+        showDeepSearchButton = show
+        notifyDataSetChanged()
+    }
+
+    fun submitList(newProducts: List<Product>) {
+        val diffCallback = ProductDiffCallback(products, newProducts)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        products.clear()
+        products.addAll(newProducts)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    fun showLoading(show: Boolean) {
+        if (show == showLoadingFooter) return
+        showLoadingFooter = show
+
+        if (show) {
+            notifyItemInserted(products.size)
+        } else {
+            notifyItemRemoved(products.size)
+        }
+    }
+
+    override fun getItemCount(): Int = products.size +
+            (if (showLoadingFooter) 1 else 0) +
+            (if (showDeepSearchButton) 1 else 0)
+
+    override fun getItemViewType(position: Int): Int {
+        return when {
+            position < products.size -> TYPE_ITEM
+            showDeepSearchButton && position == products.size -> TYPE_DEEP_SEARCH
+            else -> TYPE_LOADING
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_ITEM -> {
+                val binding = ItemListProductBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                ProductViewHolder(binding)
+            }
+            TYPE_LOADING -> {
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_loading_footer, parent, false)
+                LoadingViewHolder(view)
+            }
+            TYPE_DEEP_SEARCH -> {
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_deep_search_footer, parent, false)
+                DeepSearchViewHolder(view)
+            }
+            else -> throw IllegalArgumentException("Tipo de vista no soportado")
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is ProductViewHolder && position < products.size) {
+            holder.bind(products[position])
+        }
+    }
+
+    inner class ProductViewHolder(private val binding: ItemListProductBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
         fun bind(product: Product) {
             binding.tvName.text = product.name
             binding.tvPrice.text = "S/. ${product.sellingPrice}"
@@ -39,22 +117,34 @@ class ProductListAdapter(
             }
 
             binding.centerIcon.setOnClickListener { onStatusClick(product) }
-
             binding.root.setOnClickListener { onEdit(product) }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
-        val binding = ItemListProductBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ProductViewHolder(binding)
+    inner class DeepSearchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val btnDeepSearch: Button = view.findViewById(R.id.btnDeepSearch)
+
+        init {
+            btnDeepSearch.setOnClickListener {
+                onDeepSearchClick()
+            }
+        }
     }
 
-    override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
+    class LoadingViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
-    class DiffCallback : DiffUtil.ItemCallback<Product>() {
-        override fun areItemsTheSame(old: Product, new: Product) = old.id == new.id
-        override fun areContentsTheSame(old: Product, new: Product) = old == new
+    class ProductDiffCallback(
+        private val oldList: List<Product>,
+        private val newList: List<Product>
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize() = oldList.size
+        override fun getNewListSize() = newList.size
+
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean =
+            oldList[oldPos].id == newList[newPos].id
+
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean =
+            oldList[oldPos] == newList[newPos]
     }
 }

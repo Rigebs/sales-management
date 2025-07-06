@@ -1,6 +1,7 @@
 package com.rige.di
 
 import com.rige.BuildConfig
+import com.rige.clients.SupabaseClient
 import com.rige.repositories.BarcodeRepository
 import com.rige.repositories.CategoryRepository
 import com.rige.repositories.CustomerRepository
@@ -22,12 +23,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSupabaseClient(): io.github.jan.supabase.SupabaseClient {
-        return createSupabaseClient(
-            supabaseUrl = BuildConfig.SUPABASE_URL,
-            supabaseKey = BuildConfig.SUPABASE_KEY
-        ) {
-            install(Postgrest)
-        }
+        return SupabaseClient.client
     }
 
     @Provides

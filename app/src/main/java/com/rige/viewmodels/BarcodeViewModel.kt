@@ -28,7 +28,9 @@ class BarcodeViewModel @Inject constructor(
     }
 
     fun addBarcodeLocally(barcode: String) {
+        println("BarcodeViewModel: addBarcodeLocally called with barcode: $barcode")
         val currentList = _barcodes.value?.toMutableList() ?: mutableListOf()
+        println("Current list: ${_barcodes.value}")
         if (currentList.none { it.code == barcode }) {
             currentList.add(
                 Barcode(
@@ -38,6 +40,7 @@ class BarcodeViewModel @Inject constructor(
                 )
             )
             _barcodes.value = currentList
+            println("List size: ${_barcodes.value}")
         }
     }
 
@@ -54,7 +57,10 @@ class BarcodeViewModel @Inject constructor(
                 productId = productId
             )
             barcodeRepository.save(newBarcode)
-            loadBarcodesByProduct(productId)
+
+            val currentList = _barcodes.value.orEmpty().toMutableList()
+            currentList.add(newBarcode)
+            _barcodes.value = currentList
         } catch (e: Exception) {
             Log.e("ProductVM", "Error guardando producto", e)
         }

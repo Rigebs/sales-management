@@ -23,11 +23,9 @@ class SaleListFragment : Fragment() {
     private lateinit var adapter: SaleListAdapter
     private var isFirstDataLoad = true
 
-    private var currentFilter: Boolean? = null
     private var shouldScrollToTop = false
 
     private var currentFilters = FilterOptions()
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

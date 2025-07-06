@@ -19,7 +19,14 @@ data class Product(
     val costPrice: BigDecimal?,
 
     val quantity: Int,
-    @SerialName("image_url") val imageUrl: String?,
+
+    @SerialName("image_url")
+    val imageUrl: String?,
+
     val status: Boolean,
-    @SerialName("category_id") val categoryId: String?
+    @SerialName("category_id")
+    val categoryId: String?,
+
+    @SerialName("user_id")
+    val userId: String? = null
 )

@@ -16,10 +16,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            app:queryHint="Buscar cliente..."
+            app:queryHint="Buscar..."
             android:foreground="?android:attr/selectableItemBackground"
             android:clickable="true"
-            android:focusable="true"/>
+            android:focusable="true"
+            app:iconifiedByDefault="false"/>
 
         <!-- RecyclerView de clientes -->
         <androidx.recyclerview.widget.RecyclerView

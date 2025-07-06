@@ -5,18 +5,35 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.card.MaterialCardView
 import com.jakewharton.threetenabp.AndroidThreeTen
+import com.rige.clients.SupabaseClient
 import com.rige.ui.CustomersActivity
+import com.rige.ui.LoginActivity
 import com.rige.ui.MakeSaleActivity
 import com.rige.ui.ProductsActivity
 import com.rige.ui.SalesActivity
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         supportActionBar?.hide()
         AndroidThreeTen.init(this)
+
+        MainScope().launch {
+            val user = SupabaseClient.client.auth.currentUserOrNull()
+            if (user == null) {
+                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                finish()
+                return@launch
+            }
+        }
+
         setContentView(R.layout.activity_main)
 
         findViewById<MaterialCardView>(R.id.cardGenerateSale).setOnClickListener {

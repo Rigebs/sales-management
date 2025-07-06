@@ -132,9 +132,6 @@ class SaleRepository(private val client: SupabaseClient) {
 
         val result = query.decodeList<SaleCustomer>()
 
-        println("🧪 ADVANCED QUERY RESULT: ${result.size}")
-        println("📍 Filters used: $filters")
-
         return result
     }
 }
