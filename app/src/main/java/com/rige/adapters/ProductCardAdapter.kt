@@ -82,6 +82,7 @@ class ProductCardAdapter(
                 with(holder) {
                     tvProductName.text = product.name
                     tvPrice.text = "s/. ${product.sellingPrice}"
+                    tvStock.text = "${product.quantity} unidades"
 
                     if (!product.imageUrl.isNullOrBlank()) {
                         Glide.with(imgProduct.context)
@@ -109,8 +110,6 @@ class ProductCardAdapter(
                     onDeepSearchClick()
                 }
             }
-
-            // No need to bind loading holder
         }
     }
 
@@ -118,6 +117,7 @@ class ProductCardAdapter(
         val imgProduct: ImageView = view.findViewById(R.id.imgProduct)
         val tvProductName: TextView = view.findViewById(R.id.tvProductName)
         val tvPrice: TextView = view.findViewById(R.id.tvPrice)
+        val tvStock: TextView = view.findViewById(R.id.tvStock)
         val btnAddToCart: ImageButton = view.findViewById(R.id.btnAddToCart)
     }
 

@@ -18,4 +18,8 @@
 
     <!-- Rojo Material -->
     <color name="red_500">#F44336</color>
+
+    <!-- gray -->
+    <color name="gray">#9E9E9E</color>
+    <color name="gray_700">#616161</color>
 </resources>

@@ -3,8 +3,11 @@ package com.rige.repositories
 import com.rige.models.Sale
 import com.rige.models.SaleCustomer
 import com.rige.models.extra.FilterOptions
+import com.rige.models.extra.SaleDetailView
+import com.rige.models.extra.SaleWithDetails
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 
 class SaleRepository(private val client: SupabaseClient) {
@@ -15,75 +18,32 @@ class SaleRepository(private val client: SupabaseClient) {
             .decodeList()
     }
 
-    suspend fun findById(id: String): Sale? {
-        return client.postgrest.from("sales")
-            .select {
+    suspend fun findSaleWithDetailsByIdj(id: String): SaleWithDetails? {
+        return client.postgrest
+            .from("sales")
+            .select(
+                Columns.raw(
+                    "id, date, is_paid, total, customer_id, " +
+                            "sale_details(id, quantity, unit_price, subtotal, product_id, sale_id, " +
+                            "products(name))"
+                )
+            ) {
                 filter {
                     eq("id", id)
                 }
             }
-            .decodeSingleOrNull()
+            .decodeSingleOrNull<SaleWithDetails>()
     }
 
-    suspend fun findAllWithCustomer(): List<SaleCustomer> {
-        return client.postgrest.from("sale_with_customer")
+    suspend fun findSaleWithDetailsById(id: String): List<SaleDetailView> {
+        return client.postgrest
+            .from("sale_detail_view")
             .select {
-                order("date", Order.DESCENDING)
+                filter {
+                    eq("sale_id", id)
+                }
             }
             .decodeList()
-    }
-
-    suspend fun findPagedWithFilters(
-        page: Int,
-        pageSize: Int,
-        searchQuery: String,
-        isPaid: Boolean?
-    ): List<SaleCustomer> {
-        val fromIndex = page * pageSize
-        val toIndex = fromIndex + pageSize - 1
-
-        val result = client.postgrest.from("sale_with_customer")
-            .select {
-                order("date", Order.DESCENDING)
-                range(fromIndex.toLong(), toIndex.toLong())
-                filter {
-                    if (searchQuery.isNotEmpty()) {
-                        ilike("customer_name", "%$searchQuery%")
-                    }
-                    if (isPaid != null) {
-                        eq("is_paid", isPaid)
-                    }
-                }
-            }
-            .decodeList<SaleCustomer>()
-
-        println("✅ Returned ${result.size} items from Supabase")
-        return result
-    }
-
-    suspend fun findPaged(page: Int,
-                          pageSize: Int,
-                          isPaid: Boolean?
-    ): List<SaleCustomer> {
-        val fromIndex = page * pageSize
-        val toIndex = fromIndex + pageSize - 1
-
-        val sales = client.postgrest.from("sale_with_customer")
-            .select {
-                order("date", Order.DESCENDING)
-                range(fromIndex.toLong(), toIndex.toLong())
-                filter {
-                    if (isPaid != null) {
-                        eq("is_paid", isPaid)
-                    }
-                }
-            }
-            .decodeList<SaleCustomer>()
-
-        println("CANTIDAD RECIBIDA: ${sales.size}")
-        println("FILTROS: isPaid = $isPaid")
-
-        return sales
     }
 
     suspend fun save(sale: Sale) {

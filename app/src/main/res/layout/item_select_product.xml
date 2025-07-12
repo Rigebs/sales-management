@@ -45,6 +45,15 @@
                 android:textSize="16sp"
                 android:textColor="#00796B"
                 android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/tvStock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="100 unidades"
+                android:textSize="16sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <ImageButton

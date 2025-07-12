@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rige.FilterCallback
@@ -43,7 +45,14 @@ class SaleListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = SaleListAdapter()
+        adapter = SaleListAdapter { saleId: String ->
+            val bundle = bundleOf("saleId" to saleId)
+            findNavController().navigate(
+                R.id.action_saleListFragment_to_saleDetailsFragment,
+                bundle
+            )
+        }
+
         binding.rvSales.apply {
             adapter = this@SaleListFragment.adapter
             layoutManager = LinearLayoutManager(requireContext())

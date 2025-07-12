@@ -13,7 +13,9 @@ import com.rige.models.SaleCustomer
 import org.threeten.bp.format.DateTimeFormatter
 import java.util.Locale
 
-class SaleListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class SaleListAdapter(
+    private val onItemClick: (saleId: String) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val sales = mutableListOf<SaleCustomer>()
     private var showLoadingFooter = false
@@ -53,7 +55,7 @@ class SaleListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return if (viewType == TYPE_ITEM) {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_list_sale, parent, false)
-            SaleViewHolder(view)
+            SaleViewHolder(view, onItemClick)
         } else {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_loading_footer, parent, false)
@@ -69,7 +71,11 @@ class SaleListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    inner class SaleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class SaleViewHolder(
+        view: View,
+        private val onItemClick: (String) -> Unit
+    ) : RecyclerView.ViewHolder(view) {
+
         private val tvSaleDate: TextView = view.findViewById(R.id.tvSaleDate)
         private val tvCustomerName: TextView = view.findViewById(R.id.tvCustomerName)
         private val tvSaleTotal: TextView = view.findViewById(R.id.tvSaleTotal)
@@ -77,7 +83,7 @@ class SaleListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun bind(sale: SaleCustomer) {
             val format = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm a", Locale.getDefault())
             tvSaleDate.text = sale.date.format(format)
-            tvCustomerName.text = "Cliente: ${sale.customerName}"
+            tvCustomerName.text = "Cliente: ${sale.customerName ?: "Varios"}"
             tvSaleTotal.text = "Total: S/ ${sale.total}"
 
             val iconRes = if (sale.isPaid) R.drawable.ic_check else R.drawable.ic_warn
@@ -86,6 +92,10 @@ class SaleListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             itemView.findViewById<ImageButton>(R.id.btnSaleStatus).apply {
                 setImageResource(iconRes)
                 setColorFilter(ContextCompat.getColor(context, tintRes))
+            }
+
+            itemView.setOnClickListener {
+                onItemClick(sale.id)
             }
         }
     }

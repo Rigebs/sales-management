@@ -9,6 +9,8 @@ import com.rige.models.Sale
 import com.rige.models.SaleCustomer
 import com.rige.models.SaleDetail
 import com.rige.models.extra.FilterOptions
+import com.rige.models.extra.SaleDetailView
+import com.rige.models.extra.SaleWithDetails
 import com.rige.repositories.SaleDetailRepository
 import com.rige.repositories.SaleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +29,9 @@ class SaleViewModel @Inject constructor(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _saleWithDetails = MutableLiveData<List<SaleDetailView>>(emptyList())
+    val saleWithDetails: LiveData<List<SaleDetailView>> = _saleWithDetails
+
     private var currentPage = 0
     private val pageSize = 10
     private var endReached = false
@@ -35,7 +40,7 @@ class SaleViewModel @Inject constructor(
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
-    private var currentFilters = FilterOptions() // Filtros activos
+    private var currentFilters = FilterOptions()
 
     fun refreshAndLoad(filters: FilterOptions = FilterOptions()) {
         currentPage = 0
@@ -44,6 +49,7 @@ class SaleViewModel @Inject constructor(
         _sales.postValue(emptyList()) // <- ESTA LÍNEA ES LA CLAVE
         loadNextPage()
     }
+
     fun loadNextPage() {
         if (_isLoading.value == true || endReached) return
 
@@ -91,6 +97,18 @@ class SaleViewModel @Inject constructor(
                 saleDetailRepository.saveAll(details)
             } catch (e: Exception) {
                 _error.value = e.message
+            }
+        }
+    }
+
+    fun getSaleWithDetailsById(id: String) {
+        viewModelScope.launch {
+            try {
+                val saleDetails = repository.findSaleWithDetailsById(id)
+                _saleWithDetails.postValue(saleDetails)
+            } catch (e: Exception) {
+                Log.e("SaleViewModel", "Error al obtener detalles de venta", e)
+                _error.postValue(e.message)
             }
         }
     }

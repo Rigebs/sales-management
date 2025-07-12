@@ -7,5 +7,20 @@
     <fragment
         android:id="@+id/saleListFragment"
         android:name="com.rige.ui.SaleListFragment"
-        android:label="Lista de ventas"/>
+        android:label="Lista de ventas">
+
+        <action
+            android:id="@+id/action_saleListFragment_to_saleDetailsFragment"
+            app:destination="@id/saleDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/saleDetailsFragment"
+        android:name="com.rige.ui.SaleDetailsFragment"
+        android:label="Detalle de venta">
+
+        <argument
+            android:name="saleId"
+            app:argType="string" />
+    </fragment>
 </navigation>
