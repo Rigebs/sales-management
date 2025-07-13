@@ -18,12 +18,12 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         lifecycleScope.launch {
-            val session = SupabaseClient.client.auth.currentSessionOrNull()
-            if (session != null) {
+            SupabaseClient.client.auth.currentSessionOrNull()?.let {
                 goToMain()
             }
         }
@@ -33,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.etPassword.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Email y contraseña requeridos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -45,32 +45,14 @@ class LoginActivity : AppCompatActivity() {
                     }
                     goToMain()
                 } catch (e: Exception) {
-                    Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-
-        binding.btnRegister.setOnClickListener {
-            val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString().trim()
-
-            lifecycleScope.launch {
-                try {
-                    SupabaseClient.client.auth.signUpWith(Email) {
-                        this.email = email
-                        this.password = password
-                    }
-                    goToMain()
-                } catch (e: Exception) {
-                    Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@LoginActivity, "Error al iniciar sesión: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
     private fun goToMain() {
-        val intent = Intent(this@LoginActivity, MainActivity::class.java)
-        startActivity(intent)
+        startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
 }

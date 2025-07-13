@@ -1,37 +1,81 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="32dp"
     android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground">
 
-    <EditText
-        android:id="@+id/etEmail"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:layout_width="match_parent"
+    <!-- Logo opcional -->
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:src="@drawable/ic_login_logo"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginBottom="24dp"
+        android:contentDescription="Logo"
+        app:tint="@color/primary"/>
+
+    <!-- Título -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:text="Bienvenido"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="?android:textColorPrimary"
+        android:layout_marginBottom="8dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:hint="Contraseña"
-        android:inputType="textPassword"
+    <!-- Subtítulo -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:text="Inicia sesión para continuar"
+        android:textSize="14sp"
+        android:textColor="?android:textColorSecondary"
+        android:layout_marginBottom="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- Email -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutEmail"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"/>
+        android:hint="Correo electrónico">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Contraseña -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutPassword"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Contraseña"
+        app:endIconMode="password_toggle">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Botón Iniciar sesión -->
     <Button
         android:id="@+id/btnLogin"
-        android:text="Iniciar sesión"
+        style="@style/Widget.Material3.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"/>
-
-    <Button
-        android:id="@+id/btnRegister"
-        android:text="Registrarse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"/>
+        android:layout_marginTop="32dp"
+        android:text="Ingresar"/>
 </LinearLayout>

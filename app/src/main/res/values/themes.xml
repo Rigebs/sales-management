@@ -31,4 +31,15 @@
     <style name="MyActionBar" parent="Widget.Material3.ActionBar.Solid">
         <item name="background">@color/white</item>
     </style>
+
+    <style name="Theme.SalesManagement.Splash" parent="Theme.SplashScreen">
+        <!-- Fondo del splash -->
+        <item name="windowSplashScreenBackground">@color/white</item>
+
+        <!-- Icono animado de splash -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_logo</item>
+
+        <!-- Tema a aplicar después del splash -->
+        <item name="postSplashScreenTheme">@style/Base</item>
+    </style>
 </resources>

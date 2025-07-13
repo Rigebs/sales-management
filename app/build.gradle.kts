@@ -106,6 +106,8 @@ dependencies {
     implementation(libs.guava)
 
     implementation (libs.flexbox)
+
+    implementation (libs.androidx.core.splashscreen)
 }
 
 kapt {
