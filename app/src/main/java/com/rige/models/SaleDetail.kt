@@ -17,6 +17,12 @@ data class SaleDetail(
     @Serializable(with = BigDecimalSerializer::class)
     val subtotal: BigDecimal,
 
-    @SerialName("product_id") val productId: String,
-    @SerialName("sale_id") val saleId: String
+    @SerialName("product_id")
+    val productId: String,
+
+    @SerialName("sale_id")
+    val saleId: String,
+
+    @SerialName("user_id")
+    val userId: String? = null
 )

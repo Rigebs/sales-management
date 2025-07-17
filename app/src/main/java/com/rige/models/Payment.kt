@@ -22,6 +22,12 @@ data class Payment(
     @Serializable(with = BigDecimalSerializer::class)
     val remainingBalance: BigDecimal,
 
-    @SerialName("payment_method_id") val paymentMethodId: String,
-    @SerialName("sale_id") val saleId: String
+    @SerialName("payment_method_id")
+    val paymentMethodId: String,
+
+    @SerialName("sale_id")
+    val saleId: String,
+
+    @SerialName("user_id")
+    val userId: String? = null
 )

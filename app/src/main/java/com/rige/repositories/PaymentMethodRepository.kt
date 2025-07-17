@@ -22,11 +22,6 @@ class PaymentMethodRepository(private val client: SupabaseClient) {
             .decodeSingleOrNull()
     }
 
-    suspend fun save(paymentMethod: PaymentMethod) {
-        client.postgrest.from("payment_methods")
-            .insert(paymentMethod)
-    }
-
     suspend fun update(paymentMethod: PaymentMethod) {
         client.postgrest.from("payment_methods")
             .update(paymentMethod) {

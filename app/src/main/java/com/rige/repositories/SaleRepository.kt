@@ -1,13 +1,12 @@
 package com.rige.repositories
 
+import com.rige.extensions.requireUserId
 import com.rige.models.Sale
 import com.rige.models.SaleCustomer
 import com.rige.models.extra.FilterOptions
 import com.rige.models.extra.SaleDetailView
-import com.rige.models.extra.SaleWithDetails
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 
 class SaleRepository(private val client: SupabaseClient) {
@@ -18,26 +17,9 @@ class SaleRepository(private val client: SupabaseClient) {
             .decodeList()
     }
 
-    suspend fun findSaleWithDetailsByIdj(id: String): SaleWithDetails? {
-        return client.postgrest
-            .from("sales")
-            .select(
-                Columns.raw(
-                    "id, date, is_paid, total, customer_id, " +
-                            "sale_details(id, quantity, unit_price, subtotal, product_id, sale_id, " +
-                            "products(name))"
-                )
-            ) {
-                filter {
-                    eq("id", id)
-                }
-            }
-            .decodeSingleOrNull<SaleWithDetails>()
-    }
-
     suspend fun findSaleWithDetailsById(id: String): List<SaleDetailView> {
         return client.postgrest
-            .from("sale_detail_view")
+            .from("vw_sales_customers")
             .select {
                 filter {
                     eq("sale_id", id)
@@ -47,17 +29,11 @@ class SaleRepository(private val client: SupabaseClient) {
     }
 
     suspend fun save(sale: Sale) {
-        client.postgrest.from("sales")
-            .insert(sale)
-    }
+        val userId = client.requireUserId()
+        val saleWithUser = sale.copy(userId = userId)
 
-    suspend fun deleteById(id: String) {
         client.postgrest.from("sales")
-            .delete {
-                filter {
-                    eq("id", id)
-                }
-            }
+            .insert(saleWithUser)
     }
 
     suspend fun findPagedAdvanced(
@@ -68,7 +44,7 @@ class SaleRepository(private val client: SupabaseClient) {
         val offset = page * pageSize
         val to = offset + pageSize - 1
 
-        val query = client.postgrest.from("sale_with_customer").select {
+        val query = client.postgrest.from("vw_sales_customers").select {
             order("date", Order.DESCENDING)
             range(offset.toLong(), to.toLong())
             filter {

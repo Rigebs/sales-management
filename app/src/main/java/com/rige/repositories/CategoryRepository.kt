@@ -1,5 +1,6 @@
 package com.rige.repositories
 
+import com.rige.extensions.requireUserId
 import com.rige.models.Category
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -23,8 +24,11 @@ class CategoryRepository(private val client: SupabaseClient) {
     }
 
     suspend fun save(category: Category) {
+        val userId = client.requireUserId()
+        val categoryWithUser = category.copy(userId = userId)
+
         client.postgrest.from("categories")
-            .insert(category)
+            .insert(categoryWithUser)
     }
 
     suspend fun update(category: Category) {

@@ -1,5 +1,6 @@
 package com.rige.repositories
 
+import com.rige.extensions.requireUserId
 import com.rige.models.Customer
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -23,8 +24,11 @@ class CustomerRepository(private val client: SupabaseClient) {
     }
 
     suspend fun save(customer: Customer) {
+        val userId = client.requireUserId()
+        val customerWithUser = customer.copy(userId = userId)
+
         client.postgrest.from("customers")
-            .insert(customer)
+            .insert(customerWithUser)
     }
 
     suspend fun update(customer: Customer) {

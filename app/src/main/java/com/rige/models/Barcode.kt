@@ -7,5 +7,10 @@ import kotlinx.serialization.Serializable
 data class Barcode(
     val id: String,
     val code: String,
-    @SerialName("product_id") val productId: String
+
+    @SerialName("product_id")
+    val productId: String,
+
+    @SerialName("user_id")
+    val userId: String? = null
 )

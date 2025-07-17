@@ -1,5 +1,6 @@
 package com.rige.repositories
 
+import com.rige.extensions.requireUserId
 import com.rige.models.Product
 import com.rige.models.extra.ProductFilterOptions
 import io.github.jan.supabase.SupabaseClient
@@ -79,8 +80,7 @@ class ProductRepository(private val client: SupabaseClient) {
     }
 
     suspend fun save(product: Product) {
-        val userId = client.auth.currentUserOrNull()?.id
-            ?: throw IllegalStateException("Usuario no autenticado")
+        val userId = client.requireUserId()
 
         val productWithUser = product.copy(userId = userId)
 

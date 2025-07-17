@@ -23,27 +23,23 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        installSplashScreen()
-
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
         AndroidThreeTen.init(this)
 
         var keepSplash = true
-        val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition { keepSplash }
 
         MainScope().launch {
-            delay(2000)
-            val session = SupabaseClient.client.auth.sessionManager.loadSession()
-            val user = SupabaseClient.client.auth.currentUserOrNull()
-
-            Log.d("SessionDebug", "Access Token: ${session?.accessToken}")
-            Log.d("SessionDebug", "Refresh Token: ${session?.refreshToken}")
+            var session = SupabaseClient.client.auth.sessionManager.loadSession()
+            var user = SupabaseClient.client.auth.currentUserOrNull()
 
             if (session == null || user == null) {
+                Log.d("SessionDebug", "$session")
+                Log.d("SessionDebug", "$user")
+
                 val refreshedUser = SupabaseClient.client.auth.currentUserOrNull()
                 if (refreshedUser == null) {
                     SupabaseClient.client.auth.signOut()
@@ -51,7 +47,12 @@ class MainActivity : AppCompatActivity() {
                     finish()
                     return@launch
                 }
+                session = SupabaseClient.client.auth.sessionManager.loadSession()
+                user = refreshedUser
             }
+
+            Log.d("SessionDebug", "Access Token: ${session?.accessToken}")
+            Log.d("SessionDebug", "Refresh Token: ${session?.refreshToken}")
 
             keepSplash = false
             setContentView(R.layout.activity_main)

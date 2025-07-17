@@ -10,11 +10,22 @@ import java.math.BigDecimal
 @Serializable
 data class SaleCustomer(
     val id: String,
+
     @Serializable(with = LocalDateTimeSerializer::class)
     val date: LocalDateTime,
-    @SerialName("is_paid") val isPaid: Boolean,
+
+    @SerialName("is_paid")
+    val isPaid: Boolean,
+
     @Serializable(with = BigDecimalSerializer::class)
     val total: BigDecimal,
-    @SerialName("customer_id") val customerId: String?,
-    @SerialName("customer_name") val customerName: String?
+
+    @SerialName("customer_id")
+    val customerId: String?,
+
+    @SerialName("customer_name")
+    val customerName: String?,
+
+    @SerialName("user_id")
+    val userId: String?
 )

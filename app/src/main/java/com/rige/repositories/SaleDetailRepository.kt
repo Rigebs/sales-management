@@ -1,5 +1,6 @@
 package com.rige.repositories
 
+import com.rige.extensions.requireUserId
 import com.rige.models.SaleDetail
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -23,9 +24,12 @@ class SaleDetailRepository(private val client: SupabaseClient) {
     }
 
     suspend fun saveAll(details: List<SaleDetail>) {
+        val userId = client.requireUserId()
+        val detailsWithUser = details.map { it.copy(userId = userId) }
+
         client.postgrest
             .from("sale_details")
-            .insert(details)
+            .insert(detailsWithUser)
     }
 
     suspend fun update(saleDetail: SaleDetail) {

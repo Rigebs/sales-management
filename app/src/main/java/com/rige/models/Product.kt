@@ -24,6 +24,7 @@ data class Product(
     val imageUrl: String?,
 
     val status: Boolean,
+
     @SerialName("category_id")
     val categoryId: String?,
 

@@ -1,5 +1,6 @@
 package com.rige.repositories
 
+import com.rige.extensions.requireUserId
 import com.rige.models.Payment
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -23,8 +24,11 @@ class PaymentRepository(private val client: SupabaseClient) {
     }
 
     suspend fun save(payment: Payment) {
+        val userId = client.requireUserId()
+        val paymentWithUser = payment.copy(userId = userId)
+
         client.postgrest.from("payments")
-            .insert(payment)
+            .insert(paymentWithUser)
     }
 
     suspend fun update(payment: Payment) {
