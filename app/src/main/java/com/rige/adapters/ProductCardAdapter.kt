@@ -82,7 +82,11 @@ class ProductCardAdapter(
                 with(holder) {
                     tvProductName.text = product.name
                     tvPrice.text = "s/. ${product.sellingPrice}"
-                    tvStock.text = "${product.quantity} unidades"
+                    tvStock.text = if (!product.isDecimal) {
+                        "${product.quantity.toInt()} unidades"
+                    } else {
+                        "${product.quantity} ${product.measureUnit}"
+                    }
 
                     if (!product.imageUrl.isNullOrBlank()) {
                         Glide.with(imgProduct.context)

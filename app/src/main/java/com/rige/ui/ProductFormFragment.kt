@@ -162,7 +162,7 @@ class ProductFormFragment : Fragment() {
         val name = binding.etName.text.toString().trim()
         val sellingPrice = binding.etSellingPrice.text.toString().toBigDecimalOrNull()
         val costPrice = binding.etCostPrice.text.toString().toBigDecimalOrNull()
-        val quantity = binding.etQuantity.text.toString().toIntOrNull()
+        val quantity = binding.etQuantity.text.toString().toBigDecimalOrNull()
         val imageUrl = selectedImageUrl ?: currentProduct?.imageUrl.orEmpty()
         val status = binding.cbStatus.isChecked
 
@@ -187,6 +187,7 @@ class ProductFormFragment : Fragment() {
         ) ?: Product(
             id = UUID.randomUUID().toString(),
             name = name,
+            isDecimal = false,
             sellingPrice = sellingPrice,
             costPrice = costPrice,
             quantity = quantity,

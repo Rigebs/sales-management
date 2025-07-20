@@ -55,6 +55,8 @@ class SelectProductsFragment : Fragment() {
                 cartViewModel.addItemToCart(
                     product.id,
                     product.name,
+                    product.isDecimal,
+                    product.measureUnit,
                     product.quantity,
                     product.imageUrl ?: "",
                     product.sellingPrice
@@ -63,7 +65,7 @@ class SelectProductsFragment : Fragment() {
             },
             onDeepSearchClick = {
                 deepSearchTriggered = true
-                applyFilters() // Ahora sí, busca en la base de datos
+                applyFilters()
             }
         )
 

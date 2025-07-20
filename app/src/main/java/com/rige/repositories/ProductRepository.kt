@@ -4,10 +4,8 @@ import com.rige.extensions.requireUserId
 import com.rige.models.Product
 import com.rige.models.extra.ProductFilterOptions
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.query.Order
 
 class ProductRepository(private val client: SupabaseClient) {
 
@@ -25,7 +23,7 @@ class ProductRepository(private val client: SupabaseClient) {
         val offset = page * pageSize
         val to = offset + pageSize - 1
 
-        val query = client.postgrest.from("products").select {
+        return client.postgrest.from("products").select {
             range(offset.toLong(), to.toLong())
             filter {
                 filters.nameContains?.let { name ->
@@ -44,14 +42,7 @@ class ProductRepository(private val client: SupabaseClient) {
                     eq("category_id", catId)
                 }
             }
-        }
-
-        val result = query.decodeList<Product>()
-
-        println("🧪 PRODUCTS QUERY RESULT: ${result.size}")
-        println("📍 Filters used: $filters")
-
-        return result
+        }.decodeList<Product>()
     }
 
     suspend fun findById(id: String): Product? {

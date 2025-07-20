@@ -8,6 +8,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.material.card.MaterialCardView
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rige.clients.SupabaseClient
+import com.rige.clients.SupabaseClient.waitForSupabaseSession
 import com.rige.ui.CustomersActivity
 import com.rige.ui.LoginActivity
 import com.rige.ui.MakeSaleActivity
@@ -37,16 +38,14 @@ class MainActivity : AppCompatActivity() {
             var user = SupabaseClient.client.auth.currentUserOrNull()
 
             if (session == null || user == null) {
-                Log.d("SessionDebug", "$session")
-                Log.d("SessionDebug", "$user")
-
-                val refreshedUser = SupabaseClient.client.auth.currentUserOrNull()
+                val refreshedUser = waitForSupabaseSession()
                 if (refreshedUser == null) {
                     SupabaseClient.client.auth.signOut()
                     startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                     finish()
                     return@launch
                 }
+
                 session = SupabaseClient.client.auth.sessionManager.loadSession()
                 user = refreshedUser
             }

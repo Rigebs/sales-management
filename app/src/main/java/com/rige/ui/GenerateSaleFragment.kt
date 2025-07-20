@@ -81,28 +81,20 @@ class GenerateSaleFragment : Fragment() {
             val saleId = UUID.randomUUID().toString()
             val now = LocalDateTime.now()
 
-            val total = cartItems.sumOf { it.price.multiply(BigDecimal(it.count)) }
-
-            val sale = Sale(
-                id = saleId,
-                date = now,
-                isPaid = isPaid,
-                total = total,
-                customerId = customer?.id
-            )
+            val total = cartItems.sumOf { it.price.multiply(it.count) }
 
             val saleDetails = cartItems.map {
                 SaleDetail(
                     id = UUID.randomUUID().toString(),
                     quantity = it.count,
                     unitPrice = it.price,
-                    subtotal = it.price.multiply(BigDecimal(it.count)),
+                    subtotal = it.price.multiply(it.count),
                     productId = it.productId,
                     saleId = saleId
                 )
             }
 
-            saleViewModel.saveSaleWithDetails(sale, saleDetails)
+            saleViewModel.processSale(customer?.id, isPaid, now,total, saleDetails)
 
             cartViewModel.clearCart()
             selectedCustomer = null
@@ -147,7 +139,7 @@ class GenerateSaleFragment : Fragment() {
         cartViewModel.cart.observe(viewLifecycleOwner) { products ->
             adapter.submitList(products.toList())
 
-            val total = products.sumOf { it.price.multiply(BigDecimal(it.count)) }
+            val total = products.sumOf { it.price.multiply(it.count) }
             txtTotal.text = "Total: s/. $total"
 
             if (products.isEmpty()) {

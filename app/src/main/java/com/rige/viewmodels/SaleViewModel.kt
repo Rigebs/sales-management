@@ -5,17 +5,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rige.models.Sale
 import com.rige.models.SaleCustomer
 import com.rige.models.SaleDetail
 import com.rige.models.extra.FilterOptions
 import com.rige.models.extra.SaleDetailView
-import com.rige.models.extra.SaleWithDetails
 import com.rige.repositories.SaleDetailRepository
 import com.rige.repositories.SaleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
+import org.threeten.bp.LocalDateTime
 
 @HiltViewModel
 class SaleViewModel @Inject constructor(
@@ -90,13 +90,18 @@ class SaleViewModel @Inject constructor(
         }
     }
 
-    fun saveSaleWithDetails(sale: Sale, details: List<SaleDetail>) {
+    fun processSale(customerId: String?, isPaid: Boolean, date: LocalDateTime, total: BigDecimal, details: List<SaleDetail>) {
         viewModelScope.launch {
             try {
-                repository.save(sale)
-                saleDetailRepository.saveAll(details)
+                repository.processSale(
+                    customerId = customerId,
+                    isPaid = isPaid,
+                    date = date,
+                    total = total,
+                    details = details
+                )
             } catch (e: Exception) {
-                _error.value = e.message
+                _error.postValue(e.message)
             }
         }
     }

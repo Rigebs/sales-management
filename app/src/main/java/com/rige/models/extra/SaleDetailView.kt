@@ -54,9 +54,6 @@ data class SaleDetailView(
     @Serializable(with = BigDecimalSerializer::class)
     val costPrice: BigDecimal?,
 
-    @SerialName("product_quantity")
-    val productQuantity: Int,
-
     @SerialName("image_url")
     val imageUrl: String?,
 

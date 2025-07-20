@@ -21,19 +21,29 @@ class CartViewModel @Inject constructor(
     private val _cart = MutableLiveData<List<CartItem>>(emptyList())
     val cart: LiveData<List<CartItem>> get() = _cart
 
-    fun addItemToCart(productId: String, name: String, stock: Int, imageUrl: String, price: BigDecimal) {
+    fun addItemToCart(
+        productId: String,
+        name: String,
+        isDecimal: Boolean,
+        measureUnit: String?,
+        stock: BigDecimal,
+        imageUrl: String,
+        price: BigDecimal,
+        countToAdd: BigDecimal = BigDecimal.ONE
+    ) {
         val current = _cart.value?.toMutableList() ?: mutableListOf()
         val index = current.indexOfFirst { it.productId == productId }
+
         if (index != -1) {
-            val updatedItem = current[index].copy(count = current[index].count + 1)
-            current[index] = updatedItem
+            val updatedCount = current[index].count + countToAdd
+            current[index] = current[index].copy(count = updatedCount)
         } else {
-            current.add(CartItem(productId, name, stock, imageUrl, price, count = 1))
+            current.add(CartItem(productId, name, isDecimal, measureUnit, stock, imageUrl, price, countToAdd))
         }
         _cart.value = current
     }
 
-    fun updateItemQuantity(productId: String, newCount: Int) {
+    fun updateItemQuantity(productId: String, newCount: BigDecimal) {
         val current = _cart.value?.toMutableList() ?: return
         val index = current.indexOfFirst { it.productId == productId }
         if (index != -1) {
@@ -59,27 +69,41 @@ class CartViewModel @Inject constructor(
                 val existingItem = currentCart.find { it.productId == product.id }
 
                 if (existingItem != null) {
-                    val newCount = existingItem.count + 1
+                    val newCount = existingItem.count + BigDecimal.ONE
                     if (newCount <= product.quantity) {
                         updateItemQuantity(product.id, newCount)
                     } else {
-                        Toast.makeText(context, "Stock máximo alcanzado para '${product.name}'.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Stock máximo alcanzado para '${product.name}'.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
-                    if (product.quantity > 0) {
+                    if (product.quantity > BigDecimal.ZERO) {
                         addItemToCart(
                             product.id,
                             product.name,
+                            product.isDecimal,
+                            product.measureUnit,
                             product.quantity,
                             product.imageUrl.toString(),
                             product.sellingPrice
                         )
                     } else {
-                        Toast.makeText(context, "Producto sin stock disponible.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Producto sin stock disponible.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } else {
-                Toast.makeText(context, "Producto no encontrado con ese código", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Producto no encontrado con ese código",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

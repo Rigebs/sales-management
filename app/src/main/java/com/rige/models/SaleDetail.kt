@@ -8,7 +8,9 @@ import java.math.BigDecimal
 @Serializable
 data class SaleDetail(
     val id: String,
-    val quantity: Int,
+
+    @Serializable(with = BigDecimalSerializer::class)
+    val quantity: BigDecimal,
 
     @Serializable(with = BigDecimalSerializer::class)
     @SerialName("unit_price")
