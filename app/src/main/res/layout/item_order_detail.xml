@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:layout_marginHorizontal="2dp"
+    android:layout_marginTop="2dp"
+    app:cardCornerRadius="8dp"
+    android:background="@android:color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Imagen del producto -->
+        <ImageView
+            android:id="@+id/imgProduct"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_broken_image"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Producto -->
+        <TextView
+            android:id="@+id/tvProductoLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Producto:"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginStart="12dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imgProduct" />
+
+        <TextView
+            android:id="@+id/tvProductName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Camisa de algodón"
+            android:textSize="14sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toTopOf="@id/tvProductoLabel"
+            app:layout_constraintStart_toEndOf="@id/tvProductoLabel"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Cantidad -->
+        <TextView
+            android:id="@+id/tvCantidadLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cantidad:"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tvProductoLabel"
+            app:layout_constraintStart_toStartOf="@id/tvProductoLabel" />
+
+        <TextView
+            android:id="@+id/tvQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2"
+            android:textSize="14sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toTopOf="@id/tvCantidadLabel"
+            app:layout_constraintStart_toEndOf="@id/tvCantidadLabel" />
+
+        <!-- Precio -->
+        <TextView
+            android:id="@+id/tvPrecioLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Precio unitario:"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tvCantidadLabel"
+            app:layout_constraintStart_toStartOf="@id/tvProductoLabel" />
+
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$25.00"
+            android:textSize="14sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toTopOf="@id/tvPrecioLabel"
+            app:layout_constraintStart_toEndOf="@id/tvPrecioLabel" />
+
+        <!-- Subtotal -->
+        <TextView
+            android:id="@+id/tvSubtotalLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subtotal:"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvPrecioLabel"
+            app:layout_constraintStart_toStartOf="@id/tvProductoLabel" />
+
+        <TextView
+            android:id="@+id/tvSubtotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="S/. 50.00"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            app:layout_constraintTop_toTopOf="@id/tvSubtotalLabel"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

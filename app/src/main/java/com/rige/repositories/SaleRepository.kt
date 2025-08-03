@@ -1,14 +1,17 @@
 package com.rige.repositories
 
+import com.rige.extensions.paginate
 import com.rige.extensions.requireUserId
 import com.rige.models.Sale
 import com.rige.models.SaleCustomer
 import com.rige.models.SaleDetail
 import com.rige.models.extra.FilterOptions
 import com.rige.models.extra.SaleDetailView
+import com.rige.utils.calculateRange
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.postgrest.query.filter.PostgrestFilterBuilder
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.*
 import org.threeten.bp.LocalDateTime
@@ -24,7 +27,7 @@ class SaleRepository(private val client: SupabaseClient) {
 
     suspend fun findSaleWithDetailsById(id: String): List<SaleDetailView> {
         return client.postgrest
-            .from("vw_sales_customers")
+            .from("sale_detail_view")
             .select {
                 filter {
                     eq("sale_id", id)
@@ -46,29 +49,10 @@ class SaleRepository(private val client: SupabaseClient) {
         pageSize: Int,
         filters: FilterOptions
     ): List<SaleCustomer> {
-        val offset = page * pageSize
-        val to = offset + pageSize - 1
-
         val query = client.postgrest.from("vw_sales_customers").select {
             order("date", Order.DESCENDING)
-            range(offset.toLong(), to.toLong())
-            filter {
-                filters.dateFrom?.let { dateFrom ->
-                    gte("date", dateFrom.toString())
-                }
-                filters.dateTo?.let { dateTo ->
-                    lte("date", dateTo.toString())
-                }
-                filters.amountMin?.let { min ->
-                    gte("total", min)
-                }
-                filters.amountMax?.let { max ->
-                    lte("total", max)
-                }
-                filters.isPaid?.let { paid ->
-                    eq("is_paid", paid)
-                }
-            }
+            paginate(page, pageSize)
+            filter(buildSaleFilters(filters))
         }
 
         return query.decodeList<SaleCustomer>()
@@ -100,6 +84,13 @@ class SaleRepository(private val client: SupabaseClient) {
         }
 
         client.postgrest.rpc("process_sale", params)
+    }
 
+    private fun buildSaleFilters(filters: FilterOptions): PostgrestFilterBuilder.() -> Unit = {
+        filters.dateFrom?.let { gte("date", it.toString()) }
+        filters.dateTo?.let { lte("date", it.toString()) }
+        filters.amountMin?.let { gte("total", it) }
+        filters.amountMax?.let { lte("total", it) }
+        filters.isPaid?.let { eq("is_paid", it) }
     }
 }

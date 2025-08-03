@@ -9,16 +9,16 @@ import com.rige.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ProductsActivity : AppCompatActivity() {
+class OrdersActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_products)
+        setContentView(R.layout.activity_orders)
 
         val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_products) as NavHostFragment
+            .findFragmentById(R.id.nav_host_orders) as NavHostFragment
         navController = navHostFragment.navController
 
         setupActionBarWithNavController(navController)

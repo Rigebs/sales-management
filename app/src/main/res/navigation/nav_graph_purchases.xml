@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_purchases"
+    app:startDestination="@id/selectSupplierFragment">
+
+    <fragment
+        android:id="@+id/selectSupplierFragment"
+        android:name="com.rige.ui.SelectSupplierFragment"
+        android:label="Seleccionar proveedor"
+        tools:layout="@layout/fragment_select_supplier">
+        <action
+            android:id="@+id/action_selectSupplierFragment_to_generateOrderFragment"
+            app:destination="@id/generateOrderFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/generateOrderFragment"
+        android:name="com.rige.ui.GenerateOrderFragment"
+        android:label="Registrar pedido"
+        tools:layout="@layout/fragment_generate_order">
+        <argument
+            android:name="supplierId"
+            app:argType="string"
+            app:nullable="true" />
+
+        <action
+            android:id="@+id/action_generateOrderFragment_to_selectProductsPurchaseFragment"
+            app:destination="@id/selectProductsPurchaseFragment" />
+        <action
+            android:id="@+id/action_generateOrderFragment_to_barcodeScannerFragment"
+            app:destination="@id/barcodeScannerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/selectProductsPurchaseFragment"
+        android:name="com.rige.ui.SelectProductsPurchaseFragment"
+        tools:layout="@layout/fragment_select_products_purchase"
+        android:label="Seleccionar producto"/>
+
+    <fragment
+        android:id="@+id/barcodeScannerFragment"
+        android:name="com.rige.ui.BarcodeScannerFragment"
+        android:label="Scanner de productos"/>
+</navigation>

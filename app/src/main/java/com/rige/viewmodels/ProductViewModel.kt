@@ -143,10 +143,4 @@ class ProductViewModel @Inject constructor(
             _error.value = "No se pudo cambiar el estado del producto"
         }
     }
-
-    fun ensureInitialDataLoaded() {
-        if (_products.value.isNullOrEmpty()) {
-            loadNextPage()
-        }
-    }
 }

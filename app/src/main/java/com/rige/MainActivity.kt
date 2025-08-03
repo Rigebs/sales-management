@@ -12,12 +12,13 @@ import com.rige.clients.SupabaseClient.waitForSupabaseSession
 import com.rige.ui.CustomersActivity
 import com.rige.ui.LoginActivity
 import com.rige.ui.MakeSaleActivity
+import com.rige.ui.OrdersActivity
 import com.rige.ui.ProductsActivity
 import com.rige.ui.SalesActivity
+import com.rige.ui.PurchasesActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         MainScope().launch {
             var session = SupabaseClient.client.auth.sessionManager.loadSession()
-            var user = SupabaseClient.client.auth.currentUserOrNull()
+            val user = SupabaseClient.client.auth.currentUserOrNull()
 
             if (session == null || user == null) {
                 val refreshedUser = waitForSupabaseSession()
@@ -47,7 +48,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 session = SupabaseClient.client.auth.sessionManager.loadSession()
-                user = refreshedUser
             }
 
             Log.d("SessionDebug", "Access Token: ${session?.accessToken}")
@@ -74,6 +74,14 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<MaterialCardView>(R.id.cardSales).setOnClickListener {
             startActivity(Intent(this, SalesActivity::class.java))
+        }
+
+        findViewById<MaterialCardView>(R.id.cardRegisterOrder).setOnClickListener {
+            startActivity(Intent(this, PurchasesActivity::class.java))
+        }
+
+        findViewById<MaterialCardView>(R.id.cardOrders).setOnClickListener {
+            startActivity(Intent(this, OrdersActivity::class.java))
         }
     }
 }

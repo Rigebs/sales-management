@@ -1,19 +1,18 @@
 package com.rige.di
 
-import com.rige.BuildConfig
 import com.rige.clients.SupabaseClient
 import com.rige.repositories.BarcodeRepository
 import com.rige.repositories.CategoryRepository
 import com.rige.repositories.CustomerRepository
+import com.rige.repositories.OrderRepository
 import com.rige.repositories.ProductRepository
 import com.rige.repositories.SaleDetailRepository
 import com.rige.repositories.SaleRepository
+import com.rige.repositories.SupplierRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
 import javax.inject.Singleton
 
 @Module
@@ -60,5 +59,17 @@ object AppModule {
     @Singleton
     fun provideBarcodeRepository(client: io.github.jan.supabase.SupabaseClient): BarcodeRepository {
         return BarcodeRepository(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupplierRepository(client: io.github.jan.supabase.SupabaseClient): SupplierRepository {
+        return SupplierRepository(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOrderRepository(client: io.github.jan.supabase.SupabaseClient): OrderRepository {
+        return OrderRepository(client)
     }
 }

@@ -18,7 +18,7 @@
 
         <item name="android:colorBackground">@color/white</item>
 
-        <item name="colorSecondary">@color/white</item>
+        <item name="colorSecondary">@color/primary</item>
         <item name="colorOnSecondary">@color/white</item>
 
         <item name="actionBarStyle">@style/MyActionBar</item>
