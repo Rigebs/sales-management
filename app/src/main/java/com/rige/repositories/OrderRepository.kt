@@ -54,11 +54,9 @@ class OrderRepository(private val client: SupabaseClient) {
                 order("date", Order.DESCENDING)
                 range(offset.toLong(), to.toLong())
                 filter {
-                    filters.dateFrom?.let { dateFrom ->
-                        gte("date", dateFrom.toString())
-                    }
-                    filters.dateTo?.let { dateTo ->
-                        lte("date", dateTo.toString())
+                    and {
+                        filters.dateFrom?.let { gte("date", it.atStartOfDay()) }
+                        filters.dateTo?.plusDays(1)?.let { lt("date", it.atStartOfDay()) }
                     }
                 }
             }

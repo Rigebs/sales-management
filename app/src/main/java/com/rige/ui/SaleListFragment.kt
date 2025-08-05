@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -15,19 +14,24 @@ import com.rige.FilterCallback
 import com.rige.R
 import com.rige.adapters.SaleListAdapter
 import com.rige.databinding.FragmentSaleListBinding
+import com.rige.models.SaleCustomer
 import com.rige.models.extra.FilterOptions
 import com.rige.viewmodels.SaleViewModel
+import kotlinx.datetime.DayOfWeek
+import org.threeten.bp.LocalDate
+import org.threeten.bp.temporal.ChronoField
 
 class SaleListFragment : Fragment() {
 
     private lateinit var binding: FragmentSaleListBinding
     private val viewModel: SaleViewModel by activityViewModels()
     private lateinit var adapter: SaleListAdapter
+
     private var isFirstDataLoad = true
-
     private var shouldScrollToTop = false
-
     private var currentFilters = FilterOptions()
+
+    private var currentDateChipId: Int = R.id.chipAllDates
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,52 +43,38 @@ class SaleListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupRecyclerView()
-        observeViewModel()
+        setupObservers()
+        setupFilters()
+        setupDateFilters()
         viewModel.ensureInitialDataLoaded()
-        setupFilter()
     }
 
     private fun setupRecyclerView() {
-        adapter = SaleListAdapter { saleId: String ->
-            val bundle = bundleOf("saleId" to saleId)
-            findNavController().navigate(
-                R.id.action_saleListFragment_to_saleDetailsFragment,
-                bundle
-            )
+        adapter = SaleListAdapter { saleId ->
+            navigateToSaleDetails(saleId)
         }
 
         binding.rvSales.apply {
             adapter = this@SaleListFragment.adapter
             layoutManager = LinearLayoutManager(requireContext())
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (dy > 0) {
-                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                        val visibleItemCount = layoutManager.childCount
-                        val totalItemCount = layoutManager.itemCount
-                        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-                        val isLastItemVisible =
-                            (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 1
-
-                        if (viewModel.isLoading.value != true && isLastItemVisible) {
-                            viewModel.loadNextPage()
-                        }
-                    }
-                }
-            })
+            addOnScrollListener(paginationScrollListener())
         }
     }
 
-    private fun observeViewModel() {
+    private fun setupObservers() {
+        observeSales()
+        observeLoadingState()
+        viewModel.totalSales.observe(viewLifecycleOwner) { total ->
+            binding.tvTotalAmount.text = "Total: S/: ${"%.2f".format(total)}"
+            binding.tvTotalAmount.visibility = View.VISIBLE
+        }
+
+    }
+
+    private fun observeSales() {
         viewModel.sales.observe(viewLifecycleOwner) { sales ->
             adapter.submitSales(sales)
-
-            val isLoading = viewModel.isLoading.value == true
-            val isEmpty = sales.isEmpty() && !isLoading
-
-            binding.tvEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
-            binding.rvSales.visibility = if (isEmpty) View.GONE else View.VISIBLE
+            toggleEmptyState(sales)
 
             if ((isFirstDataLoad || shouldScrollToTop) && sales.isNotEmpty()) {
                 binding.rvSales.scrollToPosition(0)
@@ -92,7 +82,9 @@ class SaleListFragment : Fragment() {
                 shouldScrollToTop = false
             }
         }
+    }
 
+    private fun observeLoadingState() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.rvSales.post {
                 adapter.showLoading(isLoading)
@@ -100,27 +92,19 @@ class SaleListFragment : Fragment() {
         }
     }
 
-    private fun setupFilter() {
-        binding.chipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
-            applyFilter(checkedIds.firstOrNull())
+    private fun setupFilters() {
+        binding.chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            applyChipFilter(checkedIds.firstOrNull())
         }
 
         binding.btnMoreFilters.setOnClickListener {
-            val bottomSheet = MoreFiltersBottomSheetFragment()
-            bottomSheet.setInitialFilters(currentFilters)
-            bottomSheet.filterCallback = object : FilterCallback {
-                override fun onFiltersApplied(filters: FilterOptions) {
-                    applyAdvancedFilters(filters)
-                }
-            }
-            bottomSheet.show(parentFragmentManager, "MoreFiltersBottomSheet")
-
+            showAdvancedFilterDialog()
         }
 
-        applyFilter(binding.chipGroup.checkedChipId)
+        applyChipFilter(binding.chipGroup.checkedChipId)
     }
 
-    private fun applyFilter(chipId: Int?) {
+    private fun applyChipFilter(chipId: Int?) {
         val isPaid = when (chipId) {
             R.id.chipAll -> null
             R.id.chipPaid -> true
@@ -129,20 +113,106 @@ class SaleListFragment : Fragment() {
         }
 
         currentFilters = currentFilters.copy(isPaid = isPaid)
-        applySearchAndFilter()
+        refreshList()
+
+        // ✅ Solo recalcular total si estamos en chip de fecha "válido"
+        if (currentDateChipId != R.id.chipAllDates) {
+            viewModel.fetchTotalSales(currentFilters)
+        }
     }
 
-    private fun applySearchAndFilter() {
+    private fun applyAdvancedFilters(newFilters: FilterOptions) {
+        // Mantener el filtro de isPaid actual
+        currentFilters = newFilters.copy(isPaid = currentFilters.isPaid)
+        refreshList()
+    }
+
+    private fun refreshList() {
         shouldScrollToTop = true
         viewModel.refreshAndLoad(currentFilters)
     }
 
-    private fun applyAdvancedFilters(advancedFilters: FilterOptions) {
-        // Mantén el valor de isPaid del chip actual
-        val mergedFilters = advancedFilters.copy(isPaid = currentFilters.isPaid)
+    private fun toggleEmptyState(sales: List<SaleCustomer>) {
+        val isLoading = viewModel.isLoading.value == true
+        val isEmpty = sales.isEmpty() && !isLoading
 
-        currentFilters = mergedFilters
-        shouldScrollToTop = true
-        viewModel.refreshAndLoad(currentFilters)
+        binding.tvEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.rvSales.visibility = if (isEmpty) View.GONE else View.VISIBLE
+    }
+
+    private fun paginationScrollListener() = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            if (dy <= 0) return
+
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+            val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+            val totalItemCount = layoutManager.itemCount
+
+            val shouldLoadMore = viewModel.isLoading.value != true &&
+                    lastVisibleItem >= totalItemCount - 1
+
+            if (shouldLoadMore) {
+                viewModel.loadNextPage()
+            }
+        }
+    }
+
+    private fun showAdvancedFilterDialog() {
+        val bottomSheet = MoreFiltersBottomSheetFragment().apply {
+            setInitialFilters(currentFilters)
+            filterCallback = object : FilterCallback {
+                override fun onFiltersApplied(filters: FilterOptions) {
+                    applyAdvancedFilters(filters)
+                }
+            }
+        }
+        bottomSheet.show(parentFragmentManager, "MoreFiltersBottomSheet")
+    }
+
+    private fun navigateToSaleDetails(saleId: String) {
+        val bundle = bundleOf("saleId" to saleId)
+        findNavController().navigate(R.id.action_saleListFragment_to_saleDetailsFragment, bundle)
+    }
+
+    private fun setupDateFilters() {
+        binding.chipDateGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            val selectedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
+
+            val today = LocalDate.now()
+            val newFilters = when (selectedId) {
+                R.id.chipAllDates -> {
+                    currentFilters.copy(dateFrom = null, dateTo = null)
+                }
+                R.id.chipToday -> {
+                    currentFilters.copy(dateFrom = today, dateTo = today)
+                }
+                R.id.chipWeek -> {
+                    val startOfWeek = today.minusDays((today.dayOfWeek.value - 1).toLong()) // Monday
+                    val endOfWeek = today.plusDays((7 - today.dayOfWeek.value).toLong())    // Sunday
+                    currentFilters.copy(dateFrom = startOfWeek, dateTo = endOfWeek)
+                }
+                R.id.chipMonth -> {
+                    val startOfMonth = today.withDayOfMonth(1)
+                    val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
+                    currentFilters.copy(dateFrom = startOfMonth, dateTo = endOfMonth)
+                }
+                else -> currentFilters
+            }
+
+            currentFilters = newFilters
+            currentDateChipId = selectedId // 🧠 Guardamos qué chip de fecha está activo
+
+            refreshList()
+
+            // ✅ Solo ejecutamos fetchTotalSales si no es "Todos"
+            if (selectedId != R.id.chipAllDates) {
+                viewModel.fetchTotalSales(currentFilters)
+            } else {
+                binding.tvTotalAmount.visibility = View.GONE // Ocultar total si es "Todos"
+            }
+        }
+
+        // Seleccionar chip "Todos" al inicio
+        binding.chipDateGroup.check(R.id.chipAllDates)
     }
 }

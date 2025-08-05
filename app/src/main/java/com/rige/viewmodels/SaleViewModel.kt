@@ -19,8 +19,7 @@ import org.threeten.bp.LocalDateTime
 
 @HiltViewModel
 class SaleViewModel @Inject constructor(
-    private val repository: SaleRepository,
-    private val saleDetailRepository: SaleDetailRepository
+    private val repository: SaleRepository
 ) : ViewModel() {
 
     private val _sales = MutableLiveData<List<SaleCustomer>>(emptyList())
@@ -41,6 +40,10 @@ class SaleViewModel @Inject constructor(
     val error: LiveData<String?> = _error
 
     private var currentFilters = FilterOptions()
+
+    private val _totalSales = MutableLiveData<Double>()
+    val totalSales: LiveData<Double> = _totalSales
+
 
     fun refreshAndLoad(filters: FilterOptions = FilterOptions()) {
         currentPage = 0
@@ -102,6 +105,17 @@ class SaleViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 _error.postValue(e.message)
+            }
+        }
+    }
+
+    fun fetchTotalSales(filters: FilterOptions) {
+        viewModelScope.launch {
+            try {
+                val total = repository.getTotalSales(filters)
+                _totalSales.postValue(total)
+            } catch (e: Exception) {
+                Log.e("SaleViewModel", "Error al obtener total de ventas", e)
             }
         }
     }

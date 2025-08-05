@@ -1,5 +1,6 @@
 package com.rige.repositories
 
+import android.util.Log
 import com.rige.extensions.paginate
 import com.rige.extensions.requireUserId
 import com.rige.models.Sale
@@ -7,7 +8,6 @@ import com.rige.models.SaleCustomer
 import com.rige.models.SaleDetail
 import com.rige.models.extra.FilterOptions
 import com.rige.models.extra.SaleDetailView
-import com.rige.utils.calculateRange
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
@@ -52,10 +52,21 @@ class SaleRepository(private val client: SupabaseClient) {
         val query = client.postgrest.from("vw_sales_customers").select {
             order("date", Order.DESCENDING)
             paginate(page, pageSize)
-            filter(buildSaleFilters(filters))
+            val filterBuilder = buildSaleFilters(filters)
+            filter(filterBuilder)
         }
 
-        return query.decodeList<SaleCustomer>()
+        println(
+            "Querying sales with filters: ${filters.dateFrom}, ${filters.dateTo}, " +
+                    "${filters.amountMin}, ${filters.amountMax}, ${filters.isPaid}"
+        )
+
+        val results = query.decodeList<SaleCustomer>()
+        results.forEach {
+            println("Venta ID: ${it.id}, fecha: ${it.date}")
+        }
+
+        return results
     }
 
     suspend fun processSale(
@@ -86,9 +97,34 @@ class SaleRepository(private val client: SupabaseClient) {
         client.postgrest.rpc("process_sale", params)
     }
 
+    suspend fun getTotalSales(filters: FilterOptions): Double {
+        val params = buildJsonObject {
+            filters.dateFrom?.let { put("p_date_from", JsonPrimitive(it.toString())) }
+            filters.dateTo?.let { put("p_date_to", JsonPrimitive(it.toString())) }
+            filters.amountMin?.let { put("p_amount_min", JsonPrimitive(it)) }
+            filters.amountMax?.let { put("p_amount_max", JsonPrimitive(it)) }
+            filters.isPaid?.let { put("p_is_paid", JsonPrimitive(it)) }
+        }
+
+        return try {
+            val result = client.postgrest
+                .rpc("get_total_sales", params)
+                .decodeAs<Double>()
+
+            Log.d("SaleRepository", "Total de ventas obtenido: $result")
+            result
+        } catch (e: Exception) {
+            Log.e("SaleRepository", "Error al obtener total de ventas", e)
+            0.0
+        }
+    }
+
+
     private fun buildSaleFilters(filters: FilterOptions): PostgrestFilterBuilder.() -> Unit = {
-        filters.dateFrom?.let { gte("date", it.toString()) }
-        filters.dateTo?.let { lte("date", it.toString()) }
+        and {
+            filters.dateFrom?.let { gte("date", it.atStartOfDay()) }
+            filters.dateTo?.plusDays(1)?.let { lt("date", it.atStartOfDay()) }
+        }
         filters.amountMin?.let { gte("total", it) }
         filters.amountMax?.let { lte("total", it) }
         filters.isPaid?.let { eq("is_paid", it) }
