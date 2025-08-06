@@ -3,9 +3,7 @@ package com.rige.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rige.R
@@ -14,26 +12,16 @@ import com.rige.models.Product
 
 class ProductListAdapter(
     val onEdit: (Product) -> Unit,
-    val onStatusClick: (Product) -> Unit,
-    val onDeepSearchClick: () -> Unit
+    val onStatusClick: (Product) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val TYPE_ITEM = 0
         private const val TYPE_LOADING = 1
-        private const val TYPE_DEEP_SEARCH = 2
     }
 
     private val products = mutableListOf<Product>()
     private var showLoadingFooter = false
-
-    private var showDeepSearchButton = false
-
-    fun setShowDeepSearchButton(show: Boolean) {
-        if (show == showDeepSearchButton) return
-        showDeepSearchButton = show
-        notifyDataSetChanged()
-    }
 
     fun submitList(newProducts: List<Product>) {
         val diffCallback = ProductDiffCallback(products, newProducts)
@@ -55,16 +43,10 @@ class ProductListAdapter(
         }
     }
 
-    override fun getItemCount(): Int = products.size +
-            (if (showLoadingFooter) 1 else 0) +
-            (if (showDeepSearchButton) 1 else 0)
+    override fun getItemCount(): Int = products.size + if (showLoadingFooter) 1 else 0
 
     override fun getItemViewType(position: Int): Int {
-        return when {
-            position < products.size -> TYPE_ITEM
-            showDeepSearchButton && position == products.size -> TYPE_DEEP_SEARCH
-            else -> TYPE_LOADING
-        }
+        return if (position < products.size) TYPE_ITEM else TYPE_LOADING
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -76,10 +58,6 @@ class ProductListAdapter(
             TYPE_LOADING -> {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_loading_footer, parent, false)
                 LoadingViewHolder(view)
-            }
-            TYPE_DEEP_SEARCH -> {
-                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_deep_search_footer, parent, false)
-                DeepSearchViewHolder(view)
             }
             else -> throw IllegalArgumentException("Tipo de vista no soportado")
         }
@@ -118,16 +96,6 @@ class ProductListAdapter(
 
             binding.centerIcon.setOnClickListener { onStatusClick(product) }
             binding.root.setOnClickListener { onEdit(product) }
-        }
-    }
-
-    inner class DeepSearchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val btnDeepSearch: Button = view.findViewById(R.id.btnDeepSearch)
-
-        init {
-            btnDeepSearch.setOnClickListener {
-                onDeepSearchClick()
-            }
         }
     }
 

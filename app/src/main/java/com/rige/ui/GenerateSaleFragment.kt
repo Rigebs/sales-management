@@ -153,7 +153,6 @@ class GenerateSaleFragment : Fragment() {
 
         parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
             val barcode = bundle.getString("barcode") ?: return@setFragmentResultListener
-            println("BARCODE: $barcode")
             cartViewModel.addProductByBarcode(requireContext(), barcode)
         }
 

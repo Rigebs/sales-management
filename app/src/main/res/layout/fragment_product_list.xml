@@ -5,20 +5,11 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Loading indicator -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:visibility="gone" />
-
     <LinearLayout
         android:id="@+id/contentContainer"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
+        android:layout_height="match_parent">
 
         <!-- SearchView -->
         <androidx.appcompat.widget.SearchView

@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import com.google.android.material.textfield.TextInputLayout
 import com.rige.FilterCallback
 import com.rige.R
 import com.rige.models.extra.FilterOptions
@@ -22,6 +23,7 @@ class MoreFiltersBottomSheetFragment : BottomSheetDialogFragment() {
     private lateinit var etDateTo: EditText
     private lateinit var etAmountMin: EditText
     private lateinit var etAmountMax: EditText
+    private lateinit var tilDateTo: TextInputLayout
 
     private var selectedDateFrom: LocalDate? = null
     private var selectedDateTo: LocalDate? = null
@@ -46,17 +48,27 @@ class MoreFiltersBottomSheetFragment : BottomSheetDialogFragment() {
         etDateTo = view.findViewById(R.id.etDateTo)
         etAmountMin = view.findViewById(R.id.etAmountMin)
         etAmountMax = view.findViewById(R.id.etAmountMax)
+
         setupDatePickers()
 
         existingFilters?.let { populateFields(it) }
 
+        tilDateTo = view.findViewById<TextInputLayout>(R.id.tilDateTo)
+
         view.findViewById<Button>(R.id.btnApplyFilters).setOnClickListener {
+            // Validar fechas
+            if (selectedDateFrom != null && selectedDateTo != null && selectedDateTo!!.isBefore(selectedDateFrom)) {
+                tilDateTo.error = "La fecha HASTA no puede ser anterior a la fecha DESDE"
+                return@setOnClickListener
+            }
+
             val filters = FilterOptions(
                 dateFrom = selectedDateFrom,
                 dateTo = selectedDateTo,
                 amountMin = etAmountMin.text.toString().toDoubleOrNull(),
                 amountMax = etAmountMax.text.toString().toDoubleOrNull()
             )
+
             filterCallback?.onFiltersApplied(filters)
             dismiss()
         }
@@ -96,6 +108,7 @@ class MoreFiltersBottomSheetFragment : BottomSheetDialogFragment() {
             showDatePicker { date ->
                 selectedDateFrom = date
                 etDateFrom.setText(date.format(formatter))
+                tilDateTo.error = null
             }
         }
 
@@ -103,6 +116,7 @@ class MoreFiltersBottomSheetFragment : BottomSheetDialogFragment() {
             showDatePicker { date ->
                 selectedDateTo = date
                 etDateTo.setText(date.format(formatter))
+                tilDateTo.error = null
             }
         }
     }

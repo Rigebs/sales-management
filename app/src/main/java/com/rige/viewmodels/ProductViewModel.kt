@@ -41,22 +41,6 @@ class ProductViewModel @Inject constructor(
         loadNextPage()
     }
 
-    fun loadProducts() {
-        _isLoading.value = true
-        _error.value = null
-
-        viewModelScope.launch {
-            try {
-                _products.value = repository.findAll()
-                println("PRODUCTOS: ${_products.value}")
-            } catch (e: Exception) {
-                _error.value = e.message
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
     fun loadNextPage() {
         if (_isLoading.value == true || endReached) return
 

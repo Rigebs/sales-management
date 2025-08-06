@@ -23,6 +23,8 @@ import com.rige.utils.createCategoryChip
 import com.rige.utils.createStatusChip
 import com.rige.viewmodels.CategoryViewModel
 import com.rige.viewmodels.ProductViewModel
+import android.os.Handler
+import android.os.Looper
 
 class ProductListFragment : Fragment() {
 
@@ -40,9 +42,11 @@ class ProductListFragment : Fragment() {
 
     private var isFirstDataLoad = true
     private var shouldScrollToTop = false
-    private var deepSearchTriggered = false
     private var productsLoaded = false
     private var categoriesLoaded = false
+
+    private var searchRunnable: Runnable? = null
+    private val searchHandler = Handler(Looper.getMainLooper())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,11 +72,7 @@ class ProductListFragment : Fragment() {
                 val action = ProductListFragmentDirections.actionToEditProduct(product.id)
                 findNavController().navigate(action)
             },
-            onStatusClick = { product -> showStatusConfirmationDialog(product) },
-            onDeepSearchClick = {
-                deepSearchTriggered = true
-                applyFilters()
-            }
+            onStatusClick = { product -> showStatusConfirmationDialog(product) }
         )
         binding.rvProducts.adapter = adapter
     }
@@ -102,12 +102,11 @@ class ProductListFragment : Fragment() {
             categories = cats
             categoriesLoaded = true
             loadCategoryChips(cats)
-            checkIfReadyToShowContent()
         }
 
         viewModel.products.observe(viewLifecycleOwner) { products ->
             allProducts = products
-            adapter.submitList(products)
+            filterLocally()
 
             if ((isFirstDataLoad || shouldScrollToTop) && products.isNotEmpty()) {
                 binding.rvProducts.scrollToPosition(0)
@@ -116,20 +115,10 @@ class ProductListFragment : Fragment() {
             }
 
             productsLoaded = true
-            checkIfReadyToShowContent()
-            filterLocally(forceHideDeepSearch = deepSearchTriggered)
-            deepSearchTriggered = false
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.rvProducts.post { adapter.showLoading(isLoading) }
-            if (isLoading && viewModel.products.value.isNullOrEmpty()) {
-                binding.progressBar.visibility = View.VISIBLE
-                binding.contentContainer.visibility = View.GONE
-            } else {
-                binding.progressBar.visibility = View.GONE
-                binding.contentContainer.visibility = View.VISIBLE
-            }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
@@ -160,15 +149,16 @@ class ProductListFragment : Fragment() {
         }
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?) = false
+            override fun onQueryTextSubmit(query: String?): Boolean = false
+
             override fun onQueryTextChange(newText: String?): Boolean {
                 searchQuery = newText ?: ""
-                if (searchQuery.isBlank()) {
-                    deepSearchTriggered = false
-                    applyFilters()
-                } else {
-                    filterLocally()
-                }
+
+                searchRunnable?.let { searchHandler.removeCallbacks(it) }
+
+                searchRunnable = Runnable { applyFilters() }
+
+                searchHandler.postDelayed(searchRunnable!!, 500)
                 return true
             }
         })
@@ -208,15 +198,11 @@ class ProductListFragment : Fragment() {
         shouldScrollToTop = true
     }
 
-    private fun filterLocally(forceHideDeepSearch: Boolean = false) {
+    private fun filterLocally() {
         val filtered = allProducts.filter {
             it.name.contains(searchQuery, ignoreCase = true)
         }
         adapter.submitList(filtered)
-        adapter.setShowDeepSearchButton(
-            !forceHideDeepSearch && searchQuery.isNotBlank() &&
-                    filtered.size < 10 && viewModel.hasMore && !deepSearchTriggered
-        )
     }
 
     private fun showStatusConfirmationDialog(product: Product) {
@@ -226,10 +212,5 @@ class ProductListFragment : Fragment() {
             .setPositiveButton("Sí") { _, _ -> viewModel.toggleStatus(product) }
             .setNegativeButton("Cancelar", null)
             .show()
-    }
-
-    private fun checkIfReadyToShowContent() {
-        binding.progressBar.visibility = if (productsLoaded && categoriesLoaded) View.GONE else View.VISIBLE
-        binding.contentContainer.visibility = if (productsLoaded && categoriesLoaded) View.VISIBLE else View.GONE
     }
 }
