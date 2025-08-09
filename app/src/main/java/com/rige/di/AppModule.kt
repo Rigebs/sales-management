@@ -6,6 +6,7 @@ import com.rige.repositories.CategoryRepository
 import com.rige.repositories.CustomerRepository
 import com.rige.repositories.OrderRepository
 import com.rige.repositories.ProductRepository
+import com.rige.repositories.ProfileRepository
 import com.rige.repositories.SaleDetailRepository
 import com.rige.repositories.SaleRepository
 import com.rige.repositories.SupplierRepository
@@ -71,5 +72,11 @@ object AppModule {
     @Singleton
     fun provideOrderRepository(client: io.github.jan.supabase.SupabaseClient): OrderRepository {
         return OrderRepository(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProfileRepository(client: io.github.jan.supabase.SupabaseClient): ProfileRepository {
+        return ProfileRepository(client)
     }
 }
