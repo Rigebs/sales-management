@@ -41,27 +41,21 @@ data class SaleDetailView(
     @Serializable(with = BigDecimalSerializer::class)
     val subtotal: BigDecimal,
 
-    @SerialName("product_id")
-    val productId: String,
-
     @SerialName("product_name")
     val productName: String,
+
+    @SerialName("is_decimal")
+    val isDecimal: Boolean,
+
+    @SerialName("measure_unit")
+    val measureUnit: String?,
 
     @SerialName("selling_price")
     @Serializable(with = BigDecimalSerializer::class)
     val sellingPrice: BigDecimal,
 
-    @SerialName("cost_price")
-    @Serializable(with = BigDecimalSerializer::class)
-    val costPrice: BigDecimal?,
-
     @SerialName("image_url")
     val imageUrl: String?,
-
-    val status: Boolean,
-
-    @SerialName("category_id")
-    val categoryId: String?,
 
     @SerialName("user_id")
     val userId: String?

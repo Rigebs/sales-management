@@ -48,6 +48,8 @@ class ProductListFragment : Fragment() {
     private var searchRunnable: Runnable? = null
     private val searchHandler = Handler(Looper.getMainLooper())
 
+    private var lastScrollPosition = 0
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,6 +63,9 @@ class ProductListFragment : Fragment() {
         setupRecyclerView()
         setupObservers()
         setupUIActions()
+
+        adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+
 
         viewModel.refreshAndLoad()
         categoryViewModel.loadCategories()
@@ -81,8 +86,10 @@ class ProductListFragment : Fragment() {
         binding.rvProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.rvProducts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                val layoutManager = rv.layoutManager as LinearLayoutManager
+                lastScrollPosition = layoutManager.findFirstVisibleItemPosition()
+
                 if (dy > 0) {
-                    val layoutManager = rv.layoutManager as LinearLayoutManager
                     val visibleItemCount = layoutManager.childCount
                     val totalItemCount = layoutManager.itemCount
                     val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
@@ -95,6 +102,7 @@ class ProductListFragment : Fragment() {
                 }
             }
         })
+
     }
 
     private fun setupObservers() {
@@ -108,14 +116,17 @@ class ProductListFragment : Fragment() {
             allProducts = products
             filterLocally()
 
-            if ((isFirstDataLoad || shouldScrollToTop) && products.isNotEmpty()) {
+            if (isFirstDataLoad || shouldScrollToTop) {
                 binding.rvProducts.scrollToPosition(0)
                 isFirstDataLoad = false
                 shouldScrollToTop = false
+            } else {
+                binding.rvProducts.scrollToPosition(lastScrollPosition)
             }
 
             productsLoaded = true
         }
+
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.rvProducts.post { adapter.showLoading(isLoading) }
@@ -135,6 +146,7 @@ class ProductListFragment : Fragment() {
             val chip = chipId.takeIf { it != View.NO_ID }
                 ?.let { binding.chipGroupStatus.findViewById<Chip>(it) }
             selectedStatus = chip?.text?.toString() ?: "Todos"
+            println("Primero")
             applyFilters()
         }
 
@@ -145,6 +157,7 @@ class ProductListFragment : Fragment() {
             val categoryName = chip?.text?.toString()
             selectedCategoryId = categories.find { it.name == categoryName }?.id
             if (categoryName == "Todos") selectedCategoryId = null
+            println("Segundo")
             applyFilters()
         }
 
@@ -152,12 +165,13 @@ class ProductListFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = false
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                searchQuery = newText ?: ""
+                val newQuery = newText ?: ""
+                if (newQuery == searchQuery) return true // no hacer nada si es el mismo texto
+
+                searchQuery = newQuery
 
                 searchRunnable?.let { searchHandler.removeCallbacks(it) }
-
                 searchRunnable = Runnable { applyFilters() }
-
                 searchHandler.postDelayed(searchRunnable!!, 500)
                 return true
             }

@@ -94,6 +94,8 @@ class GenerateSaleFragment : Fragment() {
                 )
             }
 
+            println("Sale details: $saleDetails")
+
             saleViewModel.processSale(customer?.id, isPaid, now,total, saleDetails)
 
             cartViewModel.clearCart()

@@ -27,7 +27,7 @@ class SaleRepository(private val client: SupabaseClient) {
 
     suspend fun findSaleWithDetailsById(id: String): List<SaleDetailView> {
         return client.postgrest
-            .from("sale_detail_view")
+            .from("vw_sale_details")
             .select {
                 filter {
                     eq("sale_id", id)
@@ -118,7 +118,6 @@ class SaleRepository(private val client: SupabaseClient) {
             0.0
         }
     }
-
 
     private fun buildSaleFilters(filters: FilterOptions): PostgrestFilterBuilder.() -> Unit = {
         and {

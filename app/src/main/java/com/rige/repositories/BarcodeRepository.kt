@@ -27,9 +27,12 @@ class BarcodeRepository(private val client: SupabaseClient) {
     }
 
     suspend fun saveAll(barcodes: List<Barcode>) {
+        val userId = client.requireUserId()
+        val barcodesWithUser = barcodes.map { it.copy(userId = userId) }
+
         client.postgrest
             .from("barcodes")
-            .insert(barcodes)
+            .insert(barcodesWithUser)
     }
 
     suspend fun deleteById(barcodeId: String) {
