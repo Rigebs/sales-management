@@ -18,6 +18,7 @@ class ProfileViewModel @Inject constructor(
     val hasAccess: StateFlow<Boolean?> = _hasAccess
 
     fun validateAccess(userId: String) {
+        _hasAccess.value = null
         viewModelScope.launch {
             val access = repository.validateCurrentUserAccess(userId)
             _hasAccess.value = access
