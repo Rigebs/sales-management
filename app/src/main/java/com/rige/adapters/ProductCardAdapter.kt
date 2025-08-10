@@ -82,6 +82,9 @@ class ProductCardAdapter(
                 with(holder) {
                     tvProductName.text = product.name
                     tvPrice.text = "s/. ${product.sellingPrice}"
+
+                    tvStock.visibility = if (product.manageStock) View.VISIBLE else View.GONE
+
                     tvStock.text = if (!product.isDecimal) {
                         "${product.quantity.toInt()} unidades"
                     } else {

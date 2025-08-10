@@ -7,6 +7,7 @@ data class CartItem (
     val name: String,
     val isDecimal: Boolean,
     val measureUnit: String?,
+    val manageStock: Boolean,
     val stock: BigDecimal,
     val imageUrl: String,
     val price: BigDecimal,

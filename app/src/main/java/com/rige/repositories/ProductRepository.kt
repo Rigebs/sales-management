@@ -33,7 +33,9 @@ class ProductRepository(private val client: SupabaseClient) {
     }
 
     suspend fun findById(id: String): Product? {
-        return client.selectById("products", id)
+        val product: Product? = client.selectById("products", id)
+        println("🔍 Supabase Fetch -> Producto: $product")
+        return product
     }
 
     suspend fun findByBarcode(barcode: String): Product? {

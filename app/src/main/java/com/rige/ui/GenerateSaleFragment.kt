@@ -22,13 +22,11 @@ import com.rige.R
 import com.rige.adapters.CartAdapter
 import com.rige.adapters.CustomerAdapter
 import com.rige.models.Customer
-import com.rige.models.Sale
 import com.rige.models.SaleDetail
 import com.rige.viewmodels.CartViewModel
 import com.rige.viewmodels.CustomerViewModel
 import com.rige.viewmodels.SaleViewModel
 import org.threeten.bp.LocalDateTime
-import java.math.BigDecimal
 import java.util.UUID
 
 class GenerateSaleFragment : Fragment() {
@@ -125,7 +123,7 @@ class GenerateSaleFragment : Fragment() {
 
         adapter = CartAdapter(
             onQuantityChange = { item, newCount ->
-                if (newCount <= item.stock) {
+                if (newCount <= item.stock || !item.manageStock) {
                     cartViewModel.updateItemQuantity(item.productId, newCount)
                 } else {
                     Toast.makeText(requireContext(), "Solo hay ${item.stock} unidades disponibles.", Toast.LENGTH_SHORT).show()

@@ -3,6 +3,7 @@ package com.rige.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import com.rige.utils.formatDecimal
 import com.rige.viewmodels.BarcodeViewModel
 import com.rige.viewmodels.CategoryViewModel
 import java.io.File
+import java.math.BigDecimal
 
 class ProductFormFragment : Fragment() {
 
@@ -57,18 +59,26 @@ class ProductFormFragment : Fragment() {
         setupObservers()
         setupListeners()
         categoryViewModel.loadCategories()
+        setupMeasureUnitSpinner()
 
         if (productId == null) {
-            if (!formInitialized) {
-                binding.cbStatus.isChecked = true
-            }
+            barcodeViewModel.clearBarcodes()
             if (!barcodesInitialized) {
-                barcodeViewModel.clearBarcodes()
+                if (barcodeViewModel.barcodes.value.isNullOrEmpty()) {
+                    barcodeViewModel.clearBarcodes()
+                }
                 barcodesInitialized = true
             }
         } else {
-            barcodeViewModel.clearBarcodes()
-            loadProduct(productId!!)
+            if (!barcodesInitialized) {
+                barcodeViewModel.loadBarcodesByProduct(productId!!)
+
+                barcodesInitialized = true
+            }
+
+            if (currentProduct == null) {
+                loadProduct(productId!!)
+            }
         }
 
     }
@@ -76,11 +86,12 @@ class ProductFormFragment : Fragment() {
     private fun setupObservers() {
         categoryViewModel.categories.observe(viewLifecycleOwner) { categories ->
             setupCategorySpinner(categories)
-            currentProduct?.let { populateForm(it) }
         }
 
         barcodeViewModel.barcodes.observe(viewLifecycleOwner) { barcodes ->
-            displayBarcodeChips(barcodes)
+            if (barcodes.isNotEmpty()) {
+                displayBarcodeChips(barcodes)
+            }
         }
 
         parentFragmentManager.setFragmentResultListener("barcode_result", viewLifecycleOwner) { _, bundle ->
@@ -128,6 +139,26 @@ class ProductFormFragment : Fragment() {
         btnScanBarcode.setOnClickListener {
             findNavController().navigate(R.id.action_productFormFragment_to_barcodeScannerFragment)
         }
+
+        cbManageStock.setOnCheckedChangeListener { _, isChecked ->
+            binding.tilQuantity.visibility = if (isChecked) View.VISIBLE else View.GONE
+            binding.tilCostPrice.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        cbIsDecimal.setOnCheckedChangeListener { _, isChecked ->
+            binding.tilMeasureUnit.visibility = if (isChecked) View.VISIBLE else View.GONE
+            if (isChecked) {
+                binding.etQuantity.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            } else {
+                binding.etQuantity.inputType = InputType.TYPE_CLASS_NUMBER
+            }
+        }
+    }
+
+    private fun setupMeasureUnitSpinner() {
+        val units = listOf("KG", "LT")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, units)
+        binding.spinnerMeasureUnit.setAdapter(adapter)
     }
 
     private fun setupImagePickerLauncher() {
@@ -161,8 +192,6 @@ class ProductFormFragment : Fragment() {
     private fun handleSaveClick() {
         val name = binding.etName.text.toString().trim()
         val sellingPrice = binding.etSellingPrice.text.toString().toBigDecimalOrNull()
-        val costPrice = binding.etCostPrice.text.toString().toBigDecimalOrNull()
-        val quantity = binding.etQuantity.text.toString().toBigDecimalOrNull()
         val imageUrl = selectedImageUrl ?: currentProduct?.imageUrl.orEmpty()
         val status = binding.cbStatus.isChecked
 
@@ -170,6 +199,14 @@ class ProductFormFragment : Fragment() {
         val categoryId = categoryViewModel.categories.value
             ?.find { it.name == selectedCategoryName }
             ?.id?.takeIf { it.isNotEmpty() }
+
+        val manageStock = binding.cbManageStock.isChecked
+        val isDecimal = binding.cbIsDecimal.isChecked
+        val measureUnit = if (isDecimal) binding.spinnerMeasureUnit.text.toString().takeIf { it.isNotBlank() } else null
+
+        val quantity = if (manageStock) binding.etQuantity.text.toString().toBigDecimalOrNull() ?: BigDecimal.ZERO else BigDecimal.ZERO
+        val costPrice = if (manageStock) binding.etCostPrice.text.toString().toBigDecimalOrNull() else null
+
 
         if (name.isBlank() || sellingPrice == null || quantity == null) {
             Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
@@ -183,17 +220,22 @@ class ProductFormFragment : Fragment() {
             quantity = quantity,
             imageUrl = imageUrl,
             status = status,
-            categoryId = categoryId
+            categoryId = categoryId,
+            manageStock = manageStock,
+            isDecimal = isDecimal,
+            measureUnit = measureUnit
         ) ?: Product(
             id = UUID.randomUUID().toString(),
             name = name,
-            isDecimal = false,
+            isDecimal = isDecimal,
+            measureUnit = measureUnit,
             sellingPrice = sellingPrice,
             costPrice = costPrice,
             quantity = quantity,
             imageUrl = imageUrl,
             status = status,
-            categoryId = categoryId
+            categoryId = categoryId,
+            manageStock = manageStock
         ))
 
         if (currentProduct == newProduct) {
@@ -222,21 +264,25 @@ class ProductFormFragment : Fragment() {
                     populateForm(it)
                     formInitialized = true
                 }
-                if (!barcodesInitialized) {
-                    barcodeViewModel.loadBarcodesByProduct(id)
-                    barcodesInitialized = true
-                }
             }
         }
     }
 
     private fun populateForm(product: Product) = with(binding) {
+        // Nombre
         etName.setText(product.name)
+
+        // Precios
         etSellingPrice.setText(product.sellingPrice.formatDecimal())
         etCostPrice.setText(product.costPrice?.formatDecimal())
+
+        // Cantidad
         etQuantity.setText(product.quantity.toString())
+
+        // Estado
         cbStatus.isChecked = product.status
 
+        // Imagen
         if (!product.imageUrl.isNullOrBlank()) {
             Glide.with(this@ProductFormFragment)
                 .load(product.imageUrl)
@@ -244,9 +290,26 @@ class ProductFormFragment : Fragment() {
             ivPreview.visibility = View.VISIBLE
         }
 
+        // Categoría
         categoryViewModel.categories.value?.let { categories ->
             val selectedCategory = categories.find { it.id == product.categoryId }
             spinnerCategory.setText(selectedCategory?.name ?: "Sin categoría", false)
+        }
+
+        // === Inventario ===
+        cbManageStock.isChecked = product.manageStock
+        tilQuantity.visibility = if (product.manageStock) View.VISIBLE else View.GONE
+        tilCostPrice.visibility = if (product.manageStock) View.VISIBLE else View.GONE
+
+        // === Producto a granel ===
+        cbIsDecimal.isChecked = product.isDecimal
+        tilMeasureUnit.visibility = if (product.isDecimal) View.VISIBLE else View.GONE
+
+        if (product.isDecimal) {
+            spinnerMeasureUnit.setText(product.measureUnit ?: "", false)
+            etQuantity.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        } else {
+            etQuantity.inputType = InputType.TYPE_CLASS_NUMBER
         }
     }
 
@@ -268,8 +331,8 @@ class ProductFormFragment : Fragment() {
                     .inflate(R.layout.item_barcode_chip, this, false) as Chip
                 chip.text = barcode.code
                 chip.setOnCloseIconClickListener {
+                    barcodeViewModel.removeBarcodeLocally(barcode.code)
                     if (productId != null) barcodeViewModel.deleteBarcode(barcode.id)
-                    else barcodeViewModel.removeBarcodeLocally(barcode.code)
                 }
                 addView(chip)
             }

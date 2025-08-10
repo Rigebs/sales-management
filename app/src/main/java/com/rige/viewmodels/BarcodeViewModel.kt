@@ -79,16 +79,13 @@ class BarcodeViewModel @Inject constructor(
     fun deleteBarcode(barcodeId: String) = viewModelScope.launch {
         try {
             barcodeRepository.deleteById(barcodeId)
-            val currentProductId = barcodes.value?.firstOrNull()?.productId
-            currentProductId?.let {
-                loadBarcodesByProduct(it)
-            }
         } catch (e: Exception) {
             Log.e("ProductVM", "Error guardando producto", e)
         }
     }
 
     fun clearBarcodes() {
+        println("clear")
         _barcodes.value = emptyList()
     }
 }

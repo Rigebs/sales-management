@@ -26,6 +26,7 @@ class CartViewModel @Inject constructor(
         name: String,
         isDecimal: Boolean,
         measureUnit: String?,
+        manageStock: Boolean,
         stock: BigDecimal,
         imageUrl: String,
         price: BigDecimal,
@@ -38,7 +39,7 @@ class CartViewModel @Inject constructor(
             val updatedCount = current[index].count + countToAdd
             current[index] = current[index].copy(count = updatedCount)
         } else {
-            current.add(CartItem(productId, name, isDecimal, measureUnit, stock, imageUrl, price, countToAdd))
+            current.add(CartItem(productId, name, isDecimal, measureUnit, manageStock, stock, imageUrl, price, countToAdd))
         }
         _cart.value = current
     }
@@ -86,6 +87,7 @@ class CartViewModel @Inject constructor(
                             product.name,
                             product.isDecimal,
                             product.measureUnit,
+                            product.manageStock,
                             product.quantity,
                             product.imageUrl.toString(),
                             product.sellingPrice

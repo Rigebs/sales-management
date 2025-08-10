@@ -57,6 +57,7 @@ class SelectProductsFragment : Fragment() {
                     product.name,
                     product.isDecimal,
                     product.measureUnit,
+                    product.manageStock,
                     product.quantity,
                     product.imageUrl ?: "",
                     product.sellingPrice

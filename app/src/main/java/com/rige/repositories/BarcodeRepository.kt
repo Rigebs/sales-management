@@ -8,7 +8,7 @@ import io.github.jan.supabase.postgrest.postgrest
 class BarcodeRepository(private val client: SupabaseClient) {
 
     suspend fun findByProductId(productId: String): List<Barcode> {
-        return client.postgrest
+        val list = client.postgrest
             .from("barcodes")
             .select {
                 filter {
@@ -16,6 +16,9 @@ class BarcodeRepository(private val client: SupabaseClient) {
                 }
             }
             .decodeList<Barcode>()
+
+        println("🔍 Supabase Fetch -> Barcodes: $list")
+        return list
     }
 
     suspend fun save(barcode: Barcode) {
@@ -36,11 +39,17 @@ class BarcodeRepository(private val client: SupabaseClient) {
     }
 
     suspend fun deleteById(barcodeId: String) {
-        client.postgrest.from("barcodes")
-            .delete {
-                filter {
-                    eq("id", barcodeId)
+        try {
+            val result = client.postgrest.from("barcodes")
+                .delete {
+                    filter {
+                        eq("id", barcodeId)
+                    }
                 }
-            }
+            println("✅ Registro con ID $barcodeId eliminado correctamente.")
+            println("Response: $result")
+        } catch (e: Exception) {
+            println("❌ Error al eliminar el registro con ID $barcodeId: ${e.message}")
+        }
     }
 }

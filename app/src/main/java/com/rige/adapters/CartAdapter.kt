@@ -65,6 +65,9 @@ class CartAdapter(
         fun bind(item: CartItem) {
             txtName.text = item.name
             txtPrice.text = "Precio: s/. ${"%.2f".format(item.price)}"
+
+            txtStock.visibility = if (item.manageStock) View.VISIBLE else View.GONE
+
             txtStock.text = "Stock: ${item.stock}"
             txtSubtotal.text = "Subtotal: s/. ${"%.2f".format(item.price * item.count)}"
             txtQuantity.text = item.count.stripTrailingZeros().toPlainString()
@@ -93,8 +96,12 @@ class CartAdapter(
         fun bind(item: CartItem) {
             txtName.text = item.name
             txtPrice.text = "Precio (${item.measureUnit}): s/. ${"%.2f".format(item.price)}"
+
+            txtStock.visibility = if (item.manageStock) View.VISIBLE else View.GONE
+
             txtStock.text = "Stock: ${item.stock} kg"
             txtSubtotal.text = "Subtotal: s/. ${"%.2f".format(item.price * item.count)}"
+
             txtQuantity.text = "${item.count.stripTrailingZeros()} kg"
 
             Glide.with(itemView.context).load(item.imageUrl).placeholder(R.drawable.ic_broken_image).into(imgProduct)

@@ -13,6 +13,9 @@ data class Product(
     @SerialName("is_decimal")
     val isDecimal: Boolean,
 
+    @SerialName("manage_stock")
+    val manageStock: Boolean = true,
+
     @SerialName("measure_unit")
     val measureUnit: String? = null,
 

@@ -98,7 +98,6 @@ class ProductViewModel @Inject constructor(
     fun saveProduct(product: Product, onComplete: () -> Unit = {}) = viewModelScope.launch {
         try {
             repository.save(product)
-            refreshAndLoad(currentFilters) // actualizar la lista paginada
             onComplete()
         } catch (e: Exception) {
             Log.e("ProductVM", "Error guardando producto", e)
@@ -109,7 +108,6 @@ class ProductViewModel @Inject constructor(
     fun updateProduct(product: Product, onComplete: (() -> Unit)? = null) = viewModelScope.launch {
         try {
             repository.update(product)
-            refreshAndLoad(currentFilters) // actualizar la lista paginada
             onComplete?.invoke()
         } catch (e: Exception) {
             Log.e("ProductVM", "Error actualizando producto", e)
