@@ -146,7 +146,6 @@ class ProductListFragment : Fragment() {
             val chip = chipId.takeIf { it != View.NO_ID }
                 ?.let { binding.chipGroupStatus.findViewById<Chip>(it) }
             selectedStatus = chip?.text?.toString() ?: "Todos"
-            println("Primero")
             applyFilters()
         }
 
@@ -162,17 +161,30 @@ class ProductListFragment : Fragment() {
         }
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // Aquí podrías forzar búsqueda remota si quieres
+                searchQuery = query ?: ""
+                applyFilters()
+                return true
+            }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                val newQuery = newText ?: ""
-                if (newQuery == searchQuery) return true // no hacer nada si es el mismo texto
+                val newQuery = newText?.trim() ?: ""
+                if (newQuery == searchQuery) return true
 
                 searchQuery = newQuery
 
                 searchRunnable?.let { searchHandler.removeCallbacks(it) }
-                searchRunnable = Runnable { applyFilters() }
-                searchHandler.postDelayed(searchRunnable!!, 500)
+
+                if (newQuery.isEmpty()) {
+                    filterLocally()
+                    applyFilters()
+                } else {
+                    filterLocally()
+
+                    searchRunnable = Runnable { applyFilters() }
+                    searchHandler.postDelayed(searchRunnable!!, 2000)
+                }
                 return true
             }
         })
@@ -214,7 +226,11 @@ class ProductListFragment : Fragment() {
 
     private fun filterLocally() {
         val filtered = allProducts.filter {
-            it.name.contains(searchQuery, ignoreCase = true)
+            (selectedCategoryId == null || it.categoryId == selectedCategoryId) &&
+                    (selectedStatus == "Todos" ||
+                            (selectedStatus == "Activos" && it.status) ||
+                            (selectedStatus == "Inactivos" && !it.status)) &&
+                    it.name.contains(searchQuery, ignoreCase = true)
         }
         adapter.submitList(filtered)
     }

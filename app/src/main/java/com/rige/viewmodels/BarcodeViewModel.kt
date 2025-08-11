@@ -85,7 +85,6 @@ class BarcodeViewModel @Inject constructor(
     }
 
     fun clearBarcodes() {
-        println("clear")
         _barcodes.value = emptyList()
     }
 }
