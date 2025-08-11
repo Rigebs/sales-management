@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_categories"
+    app:startDestination="@id/categoryListFragment">
+
+    <fragment
+        android:id="@+id/categoryFormFragment"
+        android:name="com.rige.ui.CategoryFormFragment"
+        android:label="Formulario de Categoría">
+    </fragment>
+
+    <fragment
+        android:id="@+id/categoryListFragment"
+        android:name="com.rige.ui.CategoryListFragment"
+        android:label="Lista de Categorías">
+
+        <action
+            android:id="@+id/actionToEditCategory"
+            app:destination="@id/categoryFormFragment">
+            <argument
+                android:name="categoryId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+    </fragment>
+
+</navigation>

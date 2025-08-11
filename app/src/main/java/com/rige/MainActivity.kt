@@ -14,6 +14,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rige.clients.SupabaseClient
 import com.rige.clients.SupabaseClient.waitForSupabaseSession
 import com.rige.ui.AccessDeniedActivity
+import com.rige.ui.CategoriesActivity
 import com.rige.ui.CustomersActivity
 import com.rige.ui.LoginActivity
 import com.rige.ui.MakeSaleActivity
@@ -102,6 +103,9 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<MaterialCardView>(R.id.cardOrders).setOnClickListener {
             startActivity(Intent(this, OrdersActivity::class.java))
+        }
+        findViewById<MaterialCardView>(R.id.cardCategories).setOnClickListener {
+            startActivity(Intent(this, CategoriesActivity::class.java))
         }
     }
 }
