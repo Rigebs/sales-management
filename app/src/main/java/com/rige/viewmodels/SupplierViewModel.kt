@@ -1,11 +1,9 @@
 package com.rige.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rige.models.Product
 import com.rige.models.Supplier
 import com.rige.repositories.SupplierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,11 +22,12 @@ class SupplierViewModel @Inject constructor(
     val isLoading: LiveData<Boolean> get() = _isLoading
 
     private val _error = MutableLiveData<String?>()
-    val error: LiveData<String?> = _error
+    val error: LiveData<String?> get() = _error
 
     private val _selectedSupplier = MutableLiveData<Supplier?>()
     val selectedSupplier: LiveData<Supplier?> get() = _selectedSupplier
 
+    // --- Cargar todos los proveedores ---
     fun loadSuppliers() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -38,7 +37,6 @@ class SupplierViewModel @Inject constructor(
                 _suppliers.value = list
             } catch (e: Exception) {
                 _error.value = "Error al cargar proveedores: ${e.message}"
-
                 println("Error al cargar proveedores: ${e.message}")
             } finally {
                 _isLoading.value = false
@@ -46,13 +44,14 @@ class SupplierViewModel @Inject constructor(
         }
     }
 
+    // --- Guardar nuevo proveedor ---
     fun saveSupplier(supplier: Supplier) {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
                 repository.save(supplier)
-                loadSuppliers() // Recarga la lista después de guardar
+                loadSuppliers()
             } catch (e: Exception) {
                 _error.value = "Error al guardar proveedor: ${e.message}"
             } finally {
@@ -61,6 +60,7 @@ class SupplierViewModel @Inject constructor(
         }
     }
 
+    // --- Cargar proveedor por ID ---
     fun loadSupplierById(id: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -75,5 +75,25 @@ class SupplierViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
+    }
+
+    // --- Actualizar proveedor existente ---
+    fun updateSupplier(supplier: Supplier) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                repository.update(supplier)
+                loadSuppliers()
+            } catch (e: Exception) {
+                _error.value = "Error al actualizar proveedor: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun clearSelectedSupplier() {
+        _selectedSupplier.value = null
     }
 }

@@ -12,11 +12,11 @@ data class Supplier(
     val phone: String,
 
     @SerialName("is_person")
-    val isPerson: Boolean,
+    val isPerson: Boolean? = null,
 
     @SerialName("created_at")
     @Serializable(with = LocalDateTimeSerializer::class)
-    val createdAt: LocalDateTime,
+    val createdAt: LocalDateTime? = null,
 
     @SerialName("user_id")
     val userId: String? = null

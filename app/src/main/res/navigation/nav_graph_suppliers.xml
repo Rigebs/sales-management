@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_suppliers"
+    app:startDestination="@id/supplierListFragment">
+
+    <fragment
+        android:id="@+id/supplierFormFragment"
+        android:name="com.rige.ui.SupplierFormFragment"
+        android:label="Formulario de Proveedor">
+    </fragment>
+
+    <fragment
+        android:id="@+id/supplierListFragment"
+        android:name="com.rige.ui.SupplierListFragment"
+        android:label="Lista de proveedores">
+
+        <action
+            android:id="@+id/actionToEditSupplier"
+            app:destination="@id/supplierFormFragment">
+            <argument
+                android:name="supplierId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+    </fragment>
+
+</navigation>

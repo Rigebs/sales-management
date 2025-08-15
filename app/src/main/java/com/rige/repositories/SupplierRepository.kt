@@ -1,6 +1,7 @@
 package com.rige.repositories
 
 import com.rige.extensions.requireUserId
+import com.rige.models.Category
 import com.rige.models.Supplier
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -37,5 +38,14 @@ class SupplierRepository(private val client: SupabaseClient) {
                 }
             }
             .decodeSingleOrNull()
+    }
+
+    suspend fun update(supplier: Supplier) {
+        client.postgrest.from("suppliers")
+            .update(supplier) {
+                filter {
+                    eq("id", supplier.id)
+                }
+            }
     }
 }

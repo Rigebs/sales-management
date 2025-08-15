@@ -22,6 +22,7 @@ import com.rige.ui.OrdersActivity
 import com.rige.ui.ProductsActivity
 import com.rige.ui.SalesActivity
 import com.rige.ui.PurchasesActivity
+import com.rige.ui.SuppliersActivity
 import com.rige.viewmodels.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.auth.auth
@@ -106,6 +107,9 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<MaterialCardView>(R.id.cardCategories).setOnClickListener {
             startActivity(Intent(this, CategoriesActivity::class.java))
+        }
+        findViewById<MaterialCardView>(R.id.cardSuppliers).setOnClickListener {
+            startActivity(Intent(this, SuppliersActivity::class.java))
         }
     }
 }
