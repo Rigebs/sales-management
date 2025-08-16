@@ -22,6 +22,48 @@
                 android:name="customerId"
                 app:argType="string" />
         </action>
+
+        <action
+            android:id="@+id/actionToSaleList"
+            app:destination="@id/saleListFragment">
+            <argument
+                android:name="customerId"
+                app:argType="string"
+                app:nullable="true"/>
+        </action>
+
+        <action
+            android:id="@+id/actionToDebts"
+            app:destination="@id/debtsFragment">
+        <argument
+            android:name="customerId"
+            app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/debtsFragment"
+        android:name="com.rige.ui.DebtsFragment"
+        android:label="Deuda del cliente"/>
+
+    <fragment
+        android:id="@+id/saleListFragment"
+        android:name="com.rige.ui.SaleListFragment"
+        android:label="Lista de ventas">
+
+        <action
+            android:id="@+id/action_saleListFragment_to_saleDetailsFragment"
+            app:destination="@id/saleDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/saleDetailsFragment"
+        android:name="com.rige.ui.SaleDetailsFragment"
+        android:label="Detalle de venta">
+
+        <argument
+            android:name="saleId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

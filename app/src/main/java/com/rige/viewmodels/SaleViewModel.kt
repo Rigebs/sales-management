@@ -9,7 +9,6 @@ import com.rige.models.SaleCustomer
 import com.rige.models.SaleDetail
 import com.rige.models.extra.FilterOptions
 import com.rige.models.extra.SaleDetailView
-import com.rige.repositories.SaleDetailRepository
 import com.rige.repositories.SaleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -46,6 +45,7 @@ class SaleViewModel @Inject constructor(
 
 
     fun refreshAndLoad(filters: FilterOptions = FilterOptions()) {
+        println("DESDE VIEWMODEL: $filters")
         currentPage = 0
         endReached = false
         currentFilters = filters
@@ -54,6 +54,7 @@ class SaleViewModel @Inject constructor(
     }
 
     fun loadNextPage() {
+        println("current: $currentFilters")
         if (_isLoading.value == true || endReached) return
 
         _isLoading.value = true

@@ -10,7 +10,8 @@ import com.rige.models.Customer
 
 class CustomerListAdapter(
     val onEdit: (Customer) -> Unit,
-    val onInvoiceClick: (Customer) -> Unit
+    val onInvoiceClick: (Customer) -> Unit,
+    val onPaymentClick: (Customer) -> Unit
 ) : ListAdapter<Customer, CustomerListAdapter.CustomerViewHolder>(DiffCallback()) {
 
     inner class CustomerViewHolder(val binding: ItemListCustomerBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -22,6 +23,7 @@ class CustomerListAdapter(
 
             binding.root.setOnClickListener { onEdit(customer) }
             binding.btnInvoice.setOnClickListener { onInvoiceClick(customer) }
+            binding.btnPayment.setOnClickListener { onPaymentClick(customer) } // Acción del nuevo botón
         }
     }
 

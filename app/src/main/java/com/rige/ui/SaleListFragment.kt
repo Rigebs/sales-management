@@ -16,6 +16,7 @@ import com.rige.adapters.SaleListAdapter
 import com.rige.databinding.FragmentSaleListBinding
 import com.rige.models.SaleCustomer
 import com.rige.models.extra.FilterOptions
+import com.rige.viewmodels.CustomerViewModel
 import com.rige.viewmodels.SaleViewModel
 import kotlinx.datetime.DayOfWeek
 import org.threeten.bp.LocalDate
@@ -25,6 +26,7 @@ class SaleListFragment : Fragment() {
 
     private lateinit var binding: FragmentSaleListBinding
     private val viewModel: SaleViewModel by activityViewModels()
+    private val customerViewModel: CustomerViewModel by activityViewModels()
     private lateinit var adapter: SaleListAdapter
 
     private var isFirstDataLoad = true
@@ -32,6 +34,13 @@ class SaleListFragment : Fragment() {
     private var currentFilters = FilterOptions()
 
     private var currentDateChipId: Int = R.id.chipAllDates
+
+    private var customerId: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        customerId = arguments?.getString("customerId")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,13 +51,28 @@ class SaleListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        customerId?.let { id ->
+            currentFilters = currentFilters.copy(customerId = id)
+            binding.layoutCustomerInfo.visibility = View.VISIBLE
+
+            customerViewModel.getCustomerById(id).observe(viewLifecycleOwner) { customer ->
+                val fullName = buildString {
+                    append(customer?.name)
+                    if (!customer?.paternalSurname.isNullOrBlank()) append(" ${customer?.paternalSurname}")
+                    if (!customer?.maternalSurname.isNullOrBlank()) append(" ${customer?.maternalSurname}")
+                }
+                binding.tvCustomerName.text = "Cliente: $fullName"
+            }
+        }
+
         setupRecyclerView()
         setupObservers()
+        refreshList()
         setupFilters()
         setupDateFilters()
+
         viewModel.ensureInitialDataLoaded()
     }
-
     private fun setupRecyclerView() {
         adapter = SaleListAdapter { saleId ->
             navigateToSaleDetails(saleId)
@@ -112,7 +136,7 @@ class SaleListFragment : Fragment() {
             else -> null
         }
 
-        currentFilters = currentFilters.copy(isPaid = isPaid)
+        currentFilters = currentFilters.copy(isPaid = isPaid, customerId = currentFilters.customerId)
         refreshList()
 
         // ✅ Solo recalcular total si estamos en chip de fecha "válido"
@@ -123,11 +147,12 @@ class SaleListFragment : Fragment() {
 
     private fun applyAdvancedFilters(newFilters: FilterOptions) {
         // Mantener el filtro de isPaid actual
-        currentFilters = newFilters.copy(isPaid = currentFilters.isPaid)
+        currentFilters = newFilters.copy(isPaid = currentFilters.isPaid, customerId = currentFilters.customerId)
         refreshList()
     }
 
     private fun refreshList() {
+        println("FRSGMENT: $currentFilters")
         shouldScrollToTop = true
         viewModel.refreshAndLoad(currentFilters)
     }
@@ -181,26 +206,26 @@ class SaleListFragment : Fragment() {
             val today = LocalDate.now()
             val newFilters = when (selectedId) {
                 R.id.chipAllDates -> {
-                    currentFilters.copy(dateFrom = null, dateTo = null)
+                    currentFilters.copy(dateFrom = null, dateTo = null, customerId = currentFilters.customerId)
                 }
                 R.id.chipToday -> {
-                    currentFilters.copy(dateFrom = today, dateTo = today)
+                    currentFilters.copy(dateFrom = today, dateTo = today, customerId = currentFilters.customerId)
                 }
                 R.id.chipWeek -> {
-                    val startOfWeek = today.minusDays((today.dayOfWeek.value - 1).toLong()) // Monday
-                    val endOfWeek = today.plusDays((7 - today.dayOfWeek.value).toLong())    // Sunday
-                    currentFilters.copy(dateFrom = startOfWeek, dateTo = endOfWeek)
+                    val startOfWeek = today.minusDays((today.dayOfWeek.value - 1).toLong())
+                    val endOfWeek = today.plusDays((7 - today.dayOfWeek.value).toLong())
+                    currentFilters.copy(dateFrom = startOfWeek, dateTo = endOfWeek, customerId = currentFilters.customerId)
                 }
                 R.id.chipMonth -> {
                     val startOfMonth = today.withDayOfMonth(1)
                     val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
-                    currentFilters.copy(dateFrom = startOfMonth, dateTo = endOfMonth)
+                    currentFilters.copy(dateFrom = startOfMonth, dateTo = endOfMonth, customerId = currentFilters.customerId)
                 }
                 else -> currentFilters
             }
 
             currentFilters = newFilters
-            currentDateChipId = selectedId // 🧠 Guardamos qué chip de fecha está activo
+            currentDateChipId = selectedId
 
             refreshList()
 

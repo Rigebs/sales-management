@@ -1,10 +1,12 @@
 package com.rige.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -41,7 +43,12 @@ class CustomerListFragment : Fragment() {
                 findNavController().navigate(action)
             },
             onInvoiceClick = { customer ->
-                println("adfkjasdflk ${customer}")
+                val bundle = bundleOf("customerId" to customer.id)
+                findNavController().navigate(R.id.actionToSaleList, bundle)
+            },
+            onPaymentClick = { customer ->
+                val bundle = bundleOf("customerId" to customer.id)
+                findNavController().navigate(R.id.actionToDebts, bundle)
             }
         )
 

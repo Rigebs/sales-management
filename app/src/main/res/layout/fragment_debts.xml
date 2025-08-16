@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Cliente -->
+    <LinearLayout
+        android:id="@+id/layoutCustomer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_user"
+            android:contentDescription="Icono cliente"
+            app:tint="?attr/colorOnSurface"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tvLabelCustomer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cliente:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/tvCustomerName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Juan Pérez"
+            android:textSize="18sp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Total de Deuda -->
+    <LinearLayout
+        android:id="@+id/layoutDebt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/layoutCustomer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_money"
+            android:contentDescription="Icono deuda"
+            app:tint="?attr/colorOnSurface"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tvLabelDebt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total deuda:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/tvTotalDebt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="S/. 0.00"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- Botón de Pagar -->
+    <Button
+        android:id="@+id/btnPay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pagar deuda"
+        android:textAllCaps="false"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/layoutDebt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

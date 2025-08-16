@@ -58,13 +58,10 @@ class SaleRepository(private val client: SupabaseClient) {
 
         println(
             "Querying sales with filters: ${filters.dateFrom}, ${filters.dateTo}, " +
-                    "${filters.amountMin}, ${filters.amountMax}, ${filters.isPaid}"
+                    "${filters.amountMin}, ${filters.amountMax}, ${filters.isPaid}" + "${filters.customerId}"
         )
 
         val results = query.decodeList<SaleCustomer>()
-        results.forEach {
-            println("Venta ID: ${it.id}, fecha: ${it.date}")
-        }
 
         return results
     }
@@ -104,6 +101,7 @@ class SaleRepository(private val client: SupabaseClient) {
             filters.amountMin?.let { put("p_amount_min", JsonPrimitive(it)) }
             filters.amountMax?.let { put("p_amount_max", JsonPrimitive(it)) }
             filters.isPaid?.let { put("p_is_paid", JsonPrimitive(it)) }
+            filters.customerId?.let { put("p_customer_id", JsonPrimitive(it)) }
         }
 
         return try {
@@ -127,5 +125,6 @@ class SaleRepository(private val client: SupabaseClient) {
         filters.amountMin?.let { gte("total", it) }
         filters.amountMax?.let { lte("total", it) }
         filters.isPaid?.let { eq("is_paid", it) }
+        filters.customerId?.let { eq("customer_id", it) }
     }
 }

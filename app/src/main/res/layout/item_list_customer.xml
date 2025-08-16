@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_alignParentStart="true"
-            android:layout_toStartOf="@+id/btnInvoice"
+            android:layout_toStartOf="@+id/btnPayment"
             android:layout_marginEnd="30dp">
 
             <TextView
@@ -51,6 +51,19 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
+        <!-- Botón Payment -->
+        <ImageButton
+            android:id="@+id/btnPayment"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_toStartOf="@id/btnInvoice"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_payment"
+            app:tint="?attr/colorOnSurface" />
+
+        <!-- Botón Invoice -->
         <ImageButton
             android:id="@+id/btnInvoice"
             android:layout_width="45dp"
@@ -58,9 +71,8 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
-            android:padding="5dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_invoice_list"
+            android:src="@drawable/ic_invoice"
             app:tint="?attr/colorOnSurface"/>
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

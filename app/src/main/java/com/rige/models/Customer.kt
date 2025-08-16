@@ -1,7 +1,9 @@
 package com.rige.models
 
+import com.rige.serializers.BigDecimalSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.math.BigDecimal
 
 @Serializable
 data class Customer(
@@ -18,6 +20,12 @@ data class Customer(
 
     val address: String?,
 
+
+
     @SerialName("user_id")
     val userId: String? = null,
+
+    @SerialName("total_debt")
+    @Serializable(with = BigDecimalSerializer::class)
+    val totalDebt: BigDecimal? = null,
 )
